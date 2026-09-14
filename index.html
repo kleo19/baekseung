@@ -62,7 +62,9 @@ button.ghost{background:transparent}
 .mode .desc{font-size:13px;color:var(--ink-2)}
 .rules{font-size:13px;color:var(--ink-2);margin-top:14px}
 .rules summary{cursor:pointer;color:var(--ink-3)}
-.rules ul{margin:8px 0 0;padding-left:18px;display:grid;gap:3px}
+.rules ul{margin:4px 0 8px;padding-left:16px;display:grid;gap:2px}
+.rulebook{margin-top:8px}
+.rulebook h4{margin:8px 0 0;font-size:12px;letter-spacing:.06em;color:var(--ink-3);font-weight:700}
 
 /* field */
 .field-card{padding:10px 10px 8px;display:grid;gap:6px}
@@ -167,26 +169,28 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 
   <!-- HOME -->
   <section id="home" class="card">
-    <p class="intro">룰렛이 준 팀에서 한 명씩. 라인업을 채우고 시즌 성적을 확인하세요.</p>
     <div class="modes">
       <button class="mode" data-mode="quick">
-        <span class="name">퀵</span>
+        <span class="name">빠른 게임</span>
         <span class="spins display">5</span>
-        <span class="desc">내야 · 외야 · 포수 · 선발 · 불펜</span>
+        <span class="desc">베스트 5인 빠르게</span>
       </button>
       <button class="mode" data-mode="standard">
-        <span class="name">스탠다드</span>
+        <span class="name">정규 게임</span>
         <span class="spins display">17</span>
-        <span class="desc">타자 9 · 선발 5 · 불펜 3</span>
+        <span class="desc">전 포지션 + 선발진 + 불펜</span>
       </button>
     </div>
     <details class="rules">
       <summary>규칙</summary>
-      <ul>
-        <li>스킵은 연도·구단 각각 퀵 1회, 스탠다드 2회</li>
-        <li>같은 선수는 한 번만</li>
-        <li>채운 자리를 눌러 옮기거나 맞바꿀 수 있음</li>
-      </ul>
+      <div class="rulebook">
+        <h4>드래프트</h4>
+        <ul><li>룰렛 → 연도 · 구단</li><li>그 팀에서 한 명 선택 → 자리 배치</li><li>전원 채우면 시즌 결과</li></ul>
+        <h4>라인업</h4>
+        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 2회)</li></ul>
+        <h4>팀 평가</h4>
+        <ul><li>타자: 타율 · 장타율 · 홈런 · 도루 · 실책</li><li>투수: ERA · K9 · BB9 · HR9 · H9</li><li>2001-2025 KBO 실제 팀 성적 기준</li><li>목표 100승</li></ul>
+      </div>
     </details>
   </section>
 
@@ -267,12 +271,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF","#666666"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
   const MODES = {
-    quick: { name:"퀵", skipY:1, skipT:1, slots:[
+    quick: { name:"빠른 게임", skipY:1, skipT:1, slots:[
       {label:"내야", role:"H", pos:IN, x:180, y:122},
       {label:"외야", role:"H", pos:OF, x:180, y:46},
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]},
-    standard: { name:"스탠다드", skipY:2, skipT:2, slots:[
+    standard: { name:"정규 게임", skipY:2, skipT:2, slots:[
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"1루", role:"H", pos:new Set(["1B"]), x:258, y:192},
       {label:"2루", role:"H", pos:new Set(["2B"]), x:230, y:130},
@@ -400,8 +404,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
-    if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.pending)}</b> 자리를 누르세요`; }
-    else if (S.moveFrom!=null){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.picks[S.moveFrom])}</b> 옮길 자리를 누르세요`; }
+    if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.pending)}</b> → 자리 선택`; }
+    else if (S.moveFrom!=null){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.picks[S.moveFrom])}</b> → 이동할 자리 선택`; }
     else st.classList.add("hidden");
   }
   function onSlotTap(i){
@@ -531,7 +535,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   $("again").onclick=()=>start(S.mode);
   $("toHome").onclick=()=>show("home");
   $("statusCancel").onclick=cancelState;
-  $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사했습니다"); }catch(e){ toast("복사할 수 없습니다"); } };
+  $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사 완료"); }catch(e){ toast("복사 실패"); } };
   const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); }
     if (qs.get("auto")||qs.get("fill")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음). fill=N 이면 N자리만
       window.__instant=true; let left = qs.get("fill") ? parseInt(qs.get("fill")) : 999;
