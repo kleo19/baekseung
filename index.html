@@ -262,7 +262,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     "라이온즈":["#074CA1","#FFFFFF","#074CA1"], "타이거즈":["#EA0029","#FFFFFF","#111111"], "베어스":["#131230","#FFFFFF","#E4002B"],
     "트윈스":["#C30452","#FFFFFF","#111111"], "자이언츠":["#FFFFFF","#041E42","#C7102E"], "이글스":["#F37321","#111111","#F37321"],
     "히어로즈":["#570514","#FFFFFF","#C9A227"], "와이번스":["#FFFFFF","#CE0E2D","#CE0E2D"], "랜더스":["#CE0E2D","#FFD400","#FFD400"],
-    "유니콘스":["#0B5A3C","#FFFFFF","#C9A227"], "다이노스":["#315288","#E4C9A1","#315288"], "위즈":["#000000","#FFFFFF","#EB1C24"]
+    "유니콘스":["#0B5A3C","#FFFFFF","#C9A227"], "다이노스":["#315288","#E4C9A1","#315288"], "위즈":["#000000","#FFFFFF","#000000"]
   };
   const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF","#666666"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
@@ -297,6 +297,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const fmt1 = v => v==null?"-":(Math.round(v*10)/10).toFixed(1);
   const person = p => p.id.split("_")[0];
   const yy = p => String(p.year%100).padStart(2,"0");
+  const nm = p => p.disp || p.name;
 
   // ---------- 채점 (score.py와 동일) ----------
   function meanZ(list,k){ return list.length? list.reduce((s,p)=>s+p.z[k],0)/list.length : 0; }
@@ -360,7 +361,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     el("rect",{x:177,y:205,width:6,height:2,fill:"var(--f-line)"},g);
     el("g",{id:"markers"},f);
   }
-  function shortName(n){ return n.length>5? n.slice(0,5) : n; }
+  function shortName(n){ return n.length>6? n.slice(0,6) : n; }
   function marker(parent,s,i,p,tg){
     const cls="mk"+(p?" done":"")+(tg?" target":"")+(S.moveFrom===i?" from":"");
     const grp=el("g",{class:cls,tabindex:(p||tg)?"0":null,role:(p||tg)?"button":null},parent);
@@ -369,7 +370,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     if (p){
       const [bg,fg,bd]=colorOf(p.nick); ring.style.fill=bg; if(!tg){ ring.style.stroke=bd; ring.style.strokeWidth="2.5"; }
       const t=el("text",{class:"nm",x:s.x,y:s.y+4},grp); t.style.fill=fg;
-      const ys=el("tspan",{class:"yr"},t); ys.textContent=yy(p)+" "; const ns=el("tspan",{},t); ns.textContent=shortName(p.name);
+      const ys=el("tspan",{class:"yr"},t); ys.textContent=yy(p)+" "; const ns=el("tspan",{},t); ns.textContent=shortName(nm(p));
     } else {
       el("text",{class:"lbl",x:s.x,y:s.y+4},grp).textContent=s.label;
     }
@@ -389,7 +390,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       for (const i of idxs){
         const s=S.slots[i], p=S.picks[i]; const b=document.createElement("button"); b.type="button";
         b.className="pill"+(p?" done":"")+(tg.has(i)?" target":"")+(S.moveFrom===i?" from":"");
-        if (p){ const [bg,fg,bd]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; b.style.borderColor=bd; } b.innerHTML=`<span class="yr">${yy(p)}</span>${p.name}`; b.title=s.label; }
+        if (p){ const [bg,fg,bd]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; b.style.borderColor=bd; } b.innerHTML=`<span class="yr">${yy(p)}</span>${nm(p)}`; b.title=s.label; }
         else b.textContent=s.label;
         if (p||tg.has(i)) b.onclick=()=>onSlotTap(i);
         row.appendChild(b);
@@ -399,8 +400,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
-    if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${S.pending.name}</b> 자리를 누르세요`; }
-    else if (S.moveFrom!=null){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${S.picks[S.moveFrom].name}</b> 옮길 자리를 누르세요`; }
+    if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.pending)}</b> 자리를 누르세요`; }
+    else if (S.moveFrom!=null){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.picks[S.moveFrom])}</b> 옮길 자리를 누르세요`; }
     else st.classList.add("hidden");
   }
   function onSlotTap(i){
@@ -473,7 +474,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     let html=`<thead><tr><th>선수</th>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>`;
     for (const p of list){
       const ok=openSl.some(sl=>fits(p,sl));
-      html+=`<tr class="${ok?"pick":"dim"}${S.pending&&S.pending.id===p.id?" sel":""}" data-id="${p.id}"><td class="who"><span class="name">${p.name}</span><span class="pos">${posLabel(p,openPos)}</span></td>${cols.map(c=>`<td class="num">${c[2](p)}</td>`).join("")}</tr>`;
+      html+=`<tr class="${ok?"pick":"dim"}${S.pending&&S.pending.id===p.id?" sel":""}" data-id="${p.id}"><td class="who"><span class="name">${nm(p)}</span><span class="pos">${posLabel(p,openPos)}</span></td>${cols.map(c=>`<td class="num">${c[2](p)}</td>`).join("")}</tr>`;
     }
     tableEl.innerHTML=html+"</tbody>";
     // 이름 칸이 넘치는 행만 단계적으로 글자 축소
@@ -515,11 +516,11 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
-      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.nick)[0]};box-shadow:inset 0 0 0 2px ${colorOf(p.nick)[2]}"></div><div class="who"><b>${p.name}</b><span>${p.year} ${p.nick}</span></div><div class="st">${st}</div></div>`);
+      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.nick)[0]};box-shadow:inset 0 0 0 2px ${colorOf(p.nick)[2]}"></div><div class="who"><b>${nm(p)}</b><span>${p.year} ${p.nick}</span></div><div class="st">${st}</div></div>`);
     });
   }
   function shareText(){
-    const r=S.result; const lines=S.picks.map((p,i)=>`${S.slots[i].label} ${p.name} (${p.year} ${p.nick})`);
+    const r=S.result; const lines=S.picks.map((p,i)=>`${S.slots[i].label} ${nm(p)} (${p.year} ${p.nick})`);
     return `백승구단 ${MODES[S.mode].name}: ${r.wins}승 ${r.losses}패 ${r.grade} ${r.label}\n`+lines.join("\n");
   }
   function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
