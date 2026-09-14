@@ -70,22 +70,23 @@ button.ghost{background:transparent}
 .mk{cursor:default}
 .mk.done,.mk.target{cursor:pointer}
 .mk .ring{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:4 3;opacity:.95}
-.mk.done .ring{stroke:none;stroke-dasharray:none;opacity:1}
+.mk.done .ring{stroke-dasharray:none;opacity:1}
 .mk.target .ring{stroke:var(--clay);stroke-width:3;stroke-dasharray:none;fill:var(--clay-soft);opacity:1}
 .mk.done.target .ring{stroke:var(--clay);stroke-width:3}
 .mk.from .ring{stroke:var(--clay);stroke-width:3;stroke-dasharray:4 3}
 .mk text{font-family:"IBM Plex Sans KR",sans-serif;text-anchor:middle;pointer-events:none}
 .mk .lbl{font-size:10px;fill:var(--ink-3)}
 .mk.target .lbl{fill:var(--clay);font-weight:700}
-.mk .nm{font-size:11px;font-weight:700}
+.mk .nm{font-size:12px;font-weight:700}
 .mk .nm tspan.yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75}
 .mk .sub{font-size:9px;opacity:.8}
 .pitch{display:grid;gap:6px;padding:2px 2px 0}
-.pitch-row{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}
-.pitch-row .rl{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink-3);width:28px}
-.pill{flex:1 1 0;min-width:0;font-size:12px;padding:6px 4px;border-radius:999px;border:1.5px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pill.done{border:1.5px solid transparent;cursor:pointer;font-weight:700}
-.pill.done .yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75;margin-right:3px}
+.pitch-row{display:flex;gap:4px;align-items:center;flex-wrap:nowrap}
+.pitch-row .rl{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink-3);width:26px}
+.pill{flex:1 1 0;min-width:0;font-size:11px;padding:6px 3px;border-radius:999px;border:2px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.pill.done{border-style:solid;cursor:pointer;font-weight:700}
+.pill.done .yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75;margin-right:2px;font-size:.85em}
+.pill.s1{font-size:10px;padding-left:2px;padding-right:2px}.pill.s2{font-size:9px}
 .pill.target{border:2px solid var(--clay);color:var(--clay);background:var(--clay-soft);cursor:pointer;font-weight:700}
 .pill.from{box-shadow:0 0 0 2px var(--clay)}
 .status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:2px 4px}
@@ -203,8 +204,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       </div>
       <div class="reel-actions">
         <button class="primary" id="spin">룰렛</button>
-        <button id="skipTeam">구단만 <b id="skipLeft1"></b></button>
-        <button id="skipYear">연도만 <b id="skipLeft2"></b></button>
+        <button id="skipYear">연도 다시뽑기 <b id="skipLeft2"></b></button>
+        <button id="skipTeam">구단 다시뽑기 <b id="skipLeft1"></b></button>
       </div>
       <div class="reel-head"><button class="ghost" id="quit" style="padding:2px 8px;font-size:12px">처음으로</button></div>
     </div>
@@ -257,12 +258,13 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const D = window.GAME_DATA; const PR = D.params;
   const IN = new Set(["1B","2B","3B","SS"]), OF = new Set(["LF","CF","RF"]);
   // 구단 색: [배경, 글자]
-  const TEAM_COLORS = {
-    "라이온즈":["#074CA1","#FFFFFF"], "타이거즈":["#EA0029","#FFFFFF"], "베어스":["#131230","#FFFFFF"], "트윈스":["#C30452","#FFFFFF"],
-    "자이언츠":["#041E42","#FFFFFF"], "이글스":["#FC4E00","#FFFFFF"], "히어로즈":["#570514","#FFFFFF"], "와이번스":["#CE0E2D","#FFFFFF"],
-    "랜더스":["#CE0E2D","#FFD400"], "유니콘스":["#0B5A3C","#FFFFFF"], "다이노스":["#315288","#E4C9A1"], "위즈":["#000000","#FFFFFF"]
+  const TEAM_COLORS = {   // [배경, 글자, 테두리] — 테두리 '없음'은 배경과 같은 색 (크기 동일)
+    "라이온즈":["#074CA1","#FFFFFF","#074CA1"], "타이거즈":["#EA0029","#FFFFFF","#111111"], "베어스":["#131230","#FFFFFF","#E4002B"],
+    "트윈스":["#C30452","#FFFFFF","#111111"], "자이언츠":["#FFFFFF","#041E42","#C7102E"], "이글스":["#F37321","#111111","#F37321"],
+    "히어로즈":["#570514","#FFFFFF","#C9A227"], "와이번스":["#FFFFFF","#CE0E2D","#CE0E2D"], "랜더스":["#CE0E2D","#FFD400","#FFD400"],
+    "유니콘스":["#0B5A3C","#FFFFFF","#C9A227"], "다이노스":["#315288","#E4C9A1","#315288"], "위즈":["#000000","#FFFFFF","#EB1C24"]
   };
-  const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF"];
+  const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF","#666666"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
   const MODES = {
     quick: { name:"퀵", skipY:1, skipT:1, slots:[
@@ -362,13 +364,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   function marker(parent,s,i,p,tg){
     const cls="mk"+(p?" done":"")+(tg?" target":"")+(S.moveFrom===i?" from":"");
     const grp=el("g",{class:cls,tabindex:(p||tg)?"0":null,role:(p||tg)?"button":null},parent);
-    const w=66,h=34;
+    const w=68,h=30;
     const ring=el("rect",{class:"ring",x:s.x-w/2,y:s.y-h/2,width:w,height:h,rx:h/2},grp);
     if (p){
-      const [bg,fg]=colorOf(p.nick); ring.style.fill=bg;
-      const t=el("text",{class:"nm",x:s.x,y:s.y-1},grp); t.style.fill=fg;
+      const [bg,fg,bd]=colorOf(p.nick); ring.style.fill=bg; if(!tg){ ring.style.stroke=bd; ring.style.strokeWidth="2.5"; }
+      const t=el("text",{class:"nm",x:s.x,y:s.y+4},grp); t.style.fill=fg;
       const ys=el("tspan",{class:"yr"},t); ys.textContent=yy(p)+" "; const ns=el("tspan",{},t); ns.textContent=shortName(p.name);
-      const sub=el("text",{class:"sub",x:s.x,y:s.y+11},grp); sub.style.fill=fg; sub.textContent=s.label;
     } else {
       el("text",{class:"lbl",x:s.x,y:s.y+4},grp).textContent=s.label;
     }
@@ -388,12 +389,14 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       for (const i of idxs){
         const s=S.slots[i], p=S.picks[i]; const b=document.createElement("button"); b.type="button";
         b.className="pill"+(p?" done":"")+(tg.has(i)?" target":"")+(S.moveFrom===i?" from":"");
-        if (p){ const [bg,fg]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; } b.innerHTML=`<span class="yr">${yy(p)}</span>${p.name}`; b.title=s.label; }
+        if (p){ const [bg,fg,bd]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; b.style.borderColor=bd; } b.innerHTML=`<span class="yr">${yy(p)}</span>${p.name}`; b.title=s.label; }
         else b.textContent=s.label;
         if (p||tg.has(i)) b.onclick=()=>onSlotTap(i);
         row.appendChild(b);
       }
     }
+    // 알약 글자가 넘치면 단계 축소
+    pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
     if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${S.pending.name}</b> 자리를 누르세요`; }
@@ -512,7 +515,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
-      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.nick)[0]}"></div><div class="who"><b>${p.name}</b><span>${p.year} ${p.nick}</span></div><div class="st">${st}</div></div>`);
+      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.nick)[0]};box-shadow:inset 0 0 0 2px ${colorOf(p.nick)[2]}"></div><div class="who"><b>${p.name}</b><span>${p.year} ${p.nick}</span></div><div class="st">${st}</div></div>`);
     });
   }
   function shareText(){
@@ -529,16 +532,16 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   $("statusCancel").onclick=cancelState;
   $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사했습니다"); }catch(e){ toast("복사할 수 없습니다"); } };
   const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); }
-    if (qs.get("auto")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음)
-      window.__instant=true;
-      while (openIdx().length){
+    if (qs.get("auto")||qs.get("fill")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음). fill=N 이면 N자리만
+      window.__instant=true; let left = qs.get("fill") ? parseInt(qs.get("fill")) : 999;
+      while (openIdx().length && left-- > 0){
         spin(); if(!S.spin) break;
         const open=openIdx().map(i=>S.slots[i]);
         const ok=S.cands.filter(p=>open.some(sl=>fits(p,sl)));
         const best=ok.reduce((a,p)=>{ const v=p.role==="H"?(p.AVG+p.SLG):-p.ERA; return (!a||v>a.v)?{p,v}:a; },null).p;
         const i=openIdx().find(i=>fits(best,S.slots[i])); place(best,i);
       }
-      document.title = "AUTO " + JSON.stringify(S.result);
+      if (S.result) document.title = "AUTO " + JSON.stringify(S.result);
     } }
 })();
 </script>
