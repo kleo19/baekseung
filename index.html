@@ -80,12 +80,12 @@ button.ghost{background:transparent}
 .mk .nm{font-size:11px;font-weight:700}
 .mk .nm tspan.yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75}
 .mk .sub{font-size:9px;opacity:.8}
-.pitch{display:grid;gap:6px;padding:2px 4px 0}
-.pitch-row{display:flex;gap:6px;flex-wrap:wrap}
-.pill{font-size:12px;padding:5px 10px;border-radius:999px;border:1.5px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2}
+.pitch{display:grid;gap:6px;padding:2px 2px 0}
+.pitch-row{display:flex;gap:5px;align-items:center;flex-wrap:nowrap}
+.pitch-row .rl{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink-3);width:28px}
+.pill{flex:1 1 0;min-width:0;font-size:12px;padding:6px 4px;border-radius:999px;border:1.5px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill.done{border:1.5px solid transparent;cursor:pointer;font-weight:700}
 .pill.done .yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75;margin-right:3px}
-.pill.done .sub{font-weight:400;opacity:.8;margin-left:4px;font-size:11px}
 .pill.target{border:2px solid var(--clay);color:var(--clay);background:var(--clay-soft);cursor:pointer;font-weight:700}
 .pill.from{box-shadow:0 0 0 2px var(--clay)}
 .status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:2px 4px}
@@ -113,17 +113,20 @@ button.ghost{background:transparent}
 .sort{display:flex;gap:4px;flex-wrap:wrap}
 .sort button{padding:4px 8px;font-size:12px;border-radius:8px}
 .sort button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}
 .tbl-wrap{margin-top:4px;width:100%;overflow:hidden}
-th,td{padding:8px 2px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid var(--line)}
-th{font-size:10px;letter-spacing:.02em;color:var(--ink-3);font-weight:500}
-th:first-child,td:first-child{text-align:left;padding-left:0;width:31%}
+th,td{padding:9px 3px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:clip;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.02em;color:var(--ink-3);font-weight:500}
+th:first-child,td:first-child{text-align:left;padding-left:0;width:25%}
+td.who.t1{font-size:12px}td.who.t1 .pos{font-size:9px}
+td.who.t2{font-size:11px}td.who.t2 .pos{font-size:8px;margin-left:2px}
+td.who.t3{font-size:10px}td.who.t3 .pos{display:none}
 td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
 tr.pick{cursor:pointer}
 tr.pick:hover td{background:var(--surface-2)}
 tr.pick.sel td{background:var(--clay-soft)}
 td .name{font-weight:700;color:var(--ink)}
-td .pos{font-size:10px;color:var(--ink-3);margin-left:4px}
+td .pos{font-size:10px;color:var(--ink-3);margin-left:3px}
 td .pos i{font-style:normal;color:var(--clay);font-weight:700}
 
 tr.dim td{color:var(--ink-3)}
@@ -179,7 +182,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     <details class="rules">
       <summary>규칙</summary>
       <ul>
-        <li>스킵은 퀵 1회, 스탠다드 3회</li>
+        <li>스킵은 연도·구단 각각 퀵 1회, 스탠다드 2회</li>
         <li>같은 선수는 한 번만</li>
         <li>채운 자리를 눌러 옮기거나 맞바꿀 수 있음</li>
       </ul>
@@ -262,12 +265,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
   const MODES = {
-    quick: { name:"퀵", skips:1, slots:[
+    quick: { name:"퀵", skipY:1, skipT:1, slots:[
       {label:"내야", role:"H", pos:IN, x:180, y:122},
       {label:"외야", role:"H", pos:OF, x:180, y:46},
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]},
-    standard: { name:"스탠다드", skips:3, slots:[
+    standard: { name:"스탠다드", skipY:2, skipT:2, slots:[
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"1루", role:"H", pos:new Set(["1B"]), x:258, y:192},
       {label:"2루", role:"H", pos:new Set(["2B"]), x:230, y:130},
@@ -308,7 +311,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   // ---------- 상태 ----------
   let S=null;
   function start(mode){
-    S={mode, slots:MODES[mode].slots, picks:MODES[mode].slots.map(()=>null), used:new Set(), skips:MODES[mode].skips,
+    S={mode, slots:MODES[mode].slots, picks:MODES[mode].slots.map(()=>null), used:new Set(), skipY:MODES[mode].skipY, skipT:MODES[mode].skipT,
        spin:null, cands:[], sortH:"SLG", sortP:"ERA", pending:null, moveFrom:null};
     show("draft"); drawField(); renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
@@ -378,13 +381,14 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     S.slots.forEach((s,i)=>{ if (s.x!=null) marker(m,s,i,S.picks[i],tg.has(i)); });
     // 투수 명단
     const pitch=$("pitch"); pitch.innerHTML="";
-    const groups=[S.slots.map((s,i)=>i).filter(i=>S.slots[i].role==="SP"), S.slots.map((s,i)=>i).filter(i=>S.slots[i].role==="RP")];
-    for (const idxs of groups){
+    const groups=[["선발",S.slots.map((s,i)=>i).filter(i=>S.slots[i].role==="SP")], ["불펜",S.slots.map((s,i)=>i).filter(i=>S.slots[i].role==="RP")]];
+    for (const [lbl,idxs] of groups){
       const row=document.createElement("div"); row.className="pitch-row"; pitch.appendChild(row);
+      const rl=document.createElement("span"); rl.className="rl"; rl.textContent=lbl; row.appendChild(rl);
       for (const i of idxs){
         const s=S.slots[i], p=S.picks[i]; const b=document.createElement("button"); b.type="button";
         b.className="pill"+(p?" done":"")+(tg.has(i)?" target":"")+(S.moveFrom===i?" from":"");
-        if (p){ const [bg,fg]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; } b.innerHTML=`<span class="yr">${yy(p)}</span>${p.name}<span class="sub">${s.label}</span>`; }
+        if (p){ const [bg,fg]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; } b.innerHTML=`<span class="yr">${yy(p)}</span>${p.name}`; b.title=s.label; }
         else b.textContent=s.label;
         if (p||tg.has(i)) b.onclick=()=>onSlotTap(i);
         row.appendChild(b);
@@ -412,7 +416,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   }
   function cancelState(){ S.pending=null; S.moveFrom=null; renderSlots(); document.querySelectorAll("tr.pick.sel").forEach(r=>r.classList.remove("sel")); }
   function resetReels(){ for (const id of ["reelYear","reelTeam"]){ const r=$(id); r.classList.remove("landed","spinning"); r.querySelector("span").textContent="----"; } }
-  function updateSkip(){ $("skipLeft1").textContent=S.skips; $("skipLeft2").textContent=S.skips; const off=S.skips<=0||!S.spin; $("skipTeam").disabled=off; $("skipYear").disabled=off; }
+  function updateSkip(){ $("skipLeft1").textContent=S.skipT; $("skipLeft2").textContent=S.skipY; $("skipTeam").disabled=S.skipT<=0||!S.spin; $("skipYear").disabled=S.skipY<=0||!S.spin; }
   function hideCands(){ $("candCard").style.display="none"; }
 
   // ---------- 룰렛 ----------
@@ -446,8 +450,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     }
     if (dur===0) land(); else requestAnimationFrame(tick);
   }
-  function skipTeam(){ if(S.skips<=0||!S.spin) return; S.skips--; const cur=S.spin; spin({y:cur.y},{nick:cur.nick}); }
-  function skipYear(){ if(S.skips<=0||!S.spin) return; S.skips--; const cur=S.spin; spin({nick:cur.nick},{y:cur.y}); }
+  function skipTeam(){ if(S.skipT<=0||!S.spin) return; S.skipT--; const cur=S.spin; spin({y:cur.y},{nick:cur.nick}); }
+  function skipYear(){ if(S.skipY<=0||!S.spin) return; S.skipY--; const cur=S.spin; spin({nick:cur.nick},{y:cur.y}); }
 
   // ---------- 후보 표 ----------
   const HCOLS=[["AVG","타율",p=>fmt3(p.AVG),p=>-p.AVG],["SLG","장타",p=>fmt3(p.SLG),p=>-p.SLG],["HR","홈런",p=>p.HR,p=>-p.HR],["SB","도루",p=>p.SB,p=>-p.SB],["E","실책",p=>p.E,p=>p.E],["G","경기",p=>p.G,p=>-p.G]];
@@ -466,9 +470,11 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     let html=`<thead><tr><th>선수</th>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>`;
     for (const p of list){
       const ok=openSl.some(sl=>fits(p,sl));
-      html+=`<tr class="${ok?"pick":"dim"}${S.pending&&S.pending.id===p.id?" sel":""}" data-id="${p.id}"><td><span class="name">${p.name}</span><span class="pos">${posLabel(p,openPos)}</span></td>${cols.map(c=>`<td class="num">${c[2](p)}</td>`).join("")}</tr>`;
+      html+=`<tr class="${ok?"pick":"dim"}${S.pending&&S.pending.id===p.id?" sel":""}" data-id="${p.id}"><td class="who"><span class="name">${p.name}</span><span class="pos">${posLabel(p,openPos)}</span></td>${cols.map(c=>`<td class="num">${c[2](p)}</td>`).join("")}</tr>`;
     }
     tableEl.innerHTML=html+"</tbody>";
+    // 이름 칸이 넘치는 행만 단계적으로 글자 축소
+    tableEl.querySelectorAll("td.who").forEach(td=>{ for (const c of ["t1","t2","t3"]){ if (td.scrollWidth<=td.clientWidth) break; td.classList.add(c); } });
     tableEl.querySelectorAll("tr.pick").forEach(r=>r.onclick=()=>choose(r.dataset.id));
   }
   function renderCands(){
@@ -522,7 +528,18 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   $("toHome").onclick=()=>show("home");
   $("statusCancel").onclick=cancelState;
   $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사했습니다"); }catch(e){ toast("복사할 수 없습니다"); } };
-  const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); } }
+  const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); }
+    if (qs.get("auto")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음)
+      window.__instant=true;
+      while (openIdx().length){
+        spin(); if(!S.spin) break;
+        const open=openIdx().map(i=>S.slots[i]);
+        const ok=S.cands.filter(p=>open.some(sl=>fits(p,sl)));
+        const best=ok.reduce((a,p)=>{ const v=p.role==="H"?(p.AVG+p.SLG):-p.ERA; return (!a||v>a.v)?{p,v}:a; },null).p;
+        const i=openIdx().find(i=>fits(best,S.slots[i])); place(best,i);
+      }
+      document.title = "AUTO " + JSON.stringify(S.result);
+    } }
 })();
 </script>
 </body>
