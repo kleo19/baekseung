@@ -253,7 +253,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js"></script>
+<script src="./game_data.js?v=1789371692"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -408,8 +408,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   function onSlotTap(i){
     const tg=targets();
     if (S.pending){
-      if (!tg.has(i)) return;
-      const p=S.pending; S.pending=null; place(p,i); return;
+      if (tg.has(i)){ const p=S.pending; S.pending=null; place(p,i); return; }
+      if (S.picks[i]){ S.pending=null; S.moveFrom=i; renderSlots(); document.querySelectorAll("tr.pick.sel").forEach(r=>r.classList.remove("sel")); }  // 대기 중 채운 마커 탭 → 이동 모드로 전환
+      return;
     }
     if (S.moveFrom!=null){
       if (i===S.moveFrom){ S.moveFrom=null; renderSlots(); return; }
@@ -536,6 +537,25 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   $("statusCancel").onclick=cancelState;
   $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사 완료"); }catch(e){ toast("복사 실패"); } };
   const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); }
+    if (qs.get("scenario")==="move"){ // 테스트: CF/LF 겸업 타자를 CF에 넣고, CF 전용 타자 팀을 뽑은 뒤 이동 → CF 전용 타자가 선택 가능해지는지
+      window.__instant=true;
+      const roh=D.players.find(p=>p.id.startsWith("")&&p.name==="로하스"&&p.year===2019);
+      const cf=S.slots.findIndex(sl=>sl.label==="중견"), lf=S.slots.findIndex(sl=>sl.label==="좌익");
+      place(roh,cf);
+      // 2005 이글스 강제 스핀
+      S.spin={y:2005,nick:"이글스"}; S.cands=(byTY.get("2005|이글스")||[]).filter(p=>!S.used.has(person(p))); renderCands(); updateSkip();
+      const row=()=>document.querySelector('tr[data-id="'+D.players.find(p=>p.name==="데이비스"&&p.year===2005).id+'"]');
+      const dav=D.players.find(p=>p.name==="데이비스"&&p.year===2005);
+      choose(dav.id);                 // 데이비스 선택 → 대기 (CF는 채워져 있어 DH만 목적지)
+      const t1=[...targets().keys()].map(i=>S.slots[i].label).join(",");
+      onSlotTap(cf);                  // 대기 중 로하스 마커 탭 → 이동 모드 전환
+      const mode=S.moveFrom===cf?"이동모드":"막힘";
+      onSlotTap(lf);                  // LF로 이동
+      choose(dav.id);                 // 데이비스 다시 선택
+      const t2=[...targets().keys()].map(i=>S.slots[i].label).join(",");
+      onSlotTap(cf);                  // CF에 배치
+      document.title="SCENARIO 1차목적지="+t1+" | "+mode+" | 2차목적지="+t2+" | CF="+(S.picks[cf]&&S.picks[cf].name)+" LF="+(S.picks[lf]&&S.picks[lf].name);
+    }
     if (qs.get("auto")||qs.get("fill")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음). fill=N 이면 N자리만
       window.__instant=true; let left = qs.get("fill") ? parseInt(qs.get("fill")) : 999;
       while (openIdx().length && left-- > 0){
