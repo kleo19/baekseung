@@ -253,7 +253,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789371692"></script>
+<script src="./game_data.js?v=1789373038"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -307,7 +307,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     let dev=0;
     for (const k of PR.HIT) dev += PR.COEF[k]*PR.K[k]*meanZ(H,k);
     for (const k of PR.PIT) dev += PR.COEF[k]*PR.K[k]*(PR.SP_SHARE*meanZ(SP,k)+(1-PR.SP_SHARE)*meanZ(RP,k));
-    const score = 100*dev/PR.CAP[mode]; const wins = winsFromScore(score);
+    const d0=(PR.D0&&PR.D0[mode])||0; const score = 100*(dev-d0)/(PR.CAP[mode]-d0); const wins = winsFromScore(score);
     const g = PR.GRADES.find(g=>wins>=g[0]);
     return {dev,score,wins,losses:144-wins,grade:g[1],label:g[2]};
   }
