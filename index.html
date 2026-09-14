@@ -70,6 +70,7 @@ button.ghost{background:transparent}
 .field{width:100%;height:auto;display:block}
 .mk{cursor:default}
 .mk.done,.mk.target{cursor:pointer}
+#resultField .mk,#resultField .pill{cursor:default;pointer-events:none}
 .mk .ring{fill:var(--surface);stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:4 3;opacity:.95}
 .mk.done .ring{stroke-dasharray:none;opacity:1}
 .mk.target .ring{stroke:var(--clay);stroke-width:3;stroke-dasharray:none;fill:var(--clay-soft);opacity:1}
@@ -225,6 +226,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 
   <!-- RESULT -->
   <section id="result" class="hidden" style="display:grid;gap:12px">
+    <div class="card field-card" id="resultField"></div>
     <div class="card">
       <div class="record">
         <div>
@@ -253,7 +255,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789373038"></script>
+<script src="./game_data.js?v=1789377884"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -512,6 +514,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   function finish(){
     const H=S.picks.filter(p=>p.role==="H"), SP=S.picks.filter(p=>p.role==="SP"), RP=S.picks.filter(p=>p.role==="RP");
     const r=scoreLineup(H,SP,RP,S.mode); S.result=r;
+    S.pending=null; S.moveFrom=null; renderSlots();
+    const rf=$("resultField"); rf.innerHTML=""; rf.appendChild($("field").cloneNode(true)); rf.appendChild($("pitch").cloneNode(true));  // 완성 라인업 그림 (정적)
     show("result");
     const big=$("recBig"); big.textContent=`${r.wins}-${r.losses}`; big.classList.toggle("perfect",r.wins>=100);
     $("recGrade").textContent=r.grade; $("recLabel").textContent=r.label;
