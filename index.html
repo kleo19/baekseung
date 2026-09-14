@@ -415,7 +415,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       if (i===S.moveFrom){ S.moveFrom=null; renderSlots(); return; }
       if (!tg.has(i)) return;
       const a=S.moveFrom, pa=S.picks[a], pb=S.picks[i];
-      S.picks[i]=pa; S.picks[a]=pb||null; S.moveFrom=null; renderSlots(); return;
+      S.picks[i]=pa; S.picks[a]=pb||null; S.moveFrom=null; renderSlots();
+      if (S.spin && S.cands.length) renderCands();   // 빈 자리가 바뀌었으니 후보 표의 선택 가능 여부 갱신
+      return;
     }
     if (S.picks[i]){ S.moveFrom=i; renderSlots(); }
   }
