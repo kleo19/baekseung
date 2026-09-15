@@ -140,8 +140,18 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .record .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .record .big{font-size:56px;line-height:1;font-weight:700;color:var(--ink)}
 .record .big.perfect{color:var(--clay)}
-.record .grade{font-size:34px;line-height:1;text-align:right}
-.record .glabel{font-size:12px;letter-spacing:.08em;color:var(--ink-2);text-align:right}
+.gradebox{display:grid;justify-items:center;gap:4px;padding:10px 16px 8px;border-radius:14px;min-width:96px;color:#fff;background:var(--g-bg);box-shadow:0 6px 18px var(--g-glow)}
+.record .grade{font-size:44px;line-height:1;text-align:center}
+.record .glabel{font-size:11px;letter-spacing:.12em;text-align:center;opacity:.9}
+.g-S{--g-bg:linear-gradient(135deg,#F2C14E,#B8860B);--g-glow:rgba(242,193,78,.55)}
+.g-Ap{--g-bg:linear-gradient(135deg,#3FA36B,#1F6B44);--g-glow:rgba(63,163,107,.45)}
+.g-A{--g-bg:linear-gradient(135deg,#4A7BB7,#2B4A6B);--g-glow:rgba(74,123,183,.4)}
+.g-B{--g-bg:linear-gradient(135deg,#7A8C9E,#546472);--g-glow:rgba(122,140,158,.3)}
+.g-C{--g-bg:linear-gradient(135deg,#C48A5A,#8F5E36);--g-glow:rgba(196,138,90,.3)}
+.g-D{--g-bg:linear-gradient(135deg,#9A9A9A,#6E6E6E);--g-glow:rgba(0,0,0,.15)}
+.g-F{--g-bg:linear-gradient(135deg,#B85C5C,#7D3A3A);--g-glow:rgba(184,92,92,.3)}
+.record.g-S .big{color:#B8860B;text-shadow:0 0 18px rgba(242,193,78,.6)}
+.record.g-Ap .big{color:#2E7A4B}
 .score-line{display:grid;gap:6px;margin-top:14px}
 .score-line .bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
 .score-line .fill{height:100%;background:linear-gradient(90deg,var(--grass),var(--clay));border-radius:999px;transition:width .8s ease}
@@ -170,13 +180,13 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   <!-- HOME -->
   <section id="home" class="card">
     <div class="modes">
-      <button class="mode" data-mode="quick">
-        <span class="name">빠른 게임</span>
-        <span class="desc">베스트 5인 빠르게</span>
-      </button>
       <button class="mode" data-mode="standard">
         <span class="name">정규 게임</span>
         <span class="desc">전 포지션 + 선발진 + 불펜</span>
+      </button>
+      <button class="mode" data-mode="quick">
+        <span class="name">빠른 게임</span>
+        <span class="desc">베스트 5인 빠르게</span>
       </button>
     </div>
     <details class="rules">
@@ -185,7 +195,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <h4>드래프트</h4>
         <ul><li>룰렛 → 연도 · 구단</li><li>그 팀에서 한 명 선택 → 자리 배치</li><li>전원 채우면 시즌 결과</li></ul>
         <h4>라인업</h4>
-        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 2회)</li></ul>
+        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회)</li></ul>
         <h4>팀 평가</h4>
         <ul><li>타자: 타율 · 장타율 · 홈런 · 도루 · 실책</li><li>투수: ERA · K9 · BB9 · HR9 · H9</li><li>2001-2025 KBO 실제 팀 성적 기준</li><li>목표 100승</li></ul>
       </div>
@@ -233,7 +243,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
           <div class="label">예상 성적</div>
           <div class="big mono" id="recBig">0-0</div>
         </div>
-        <div>
+        <div class="gradebox" id="gradeBox">
           <div class="grade display" id="recGrade">-</div>
           <div class="glabel" id="recLabel"></div>
         </div>
@@ -255,7 +265,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789377884"></script>
+<script src="./game_data.js?v=1789449805"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -275,7 +285,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       {label:"외야", role:"H", pos:OF, x:180, y:46},
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]},
-    standard: { name:"정규 게임", skipY:2, skipT:2, slots:[
+    standard: { name:"정규 게임", skipY:5, skipT:5, slots:[
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"1루", role:"H", pos:new Set(["1B"]), x:258, y:192},
       {label:"2루", role:"H", pos:new Set(["2B"]), x:230, y:130},
@@ -519,6 +529,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     show("result");
     const big=$("recBig"); big.textContent=`${r.wins}-${r.losses}`; big.classList.toggle("perfect",r.wins>=100);
     $("recGrade").textContent=r.grade; $("recLabel").textContent=r.label;
+    const gc="g-"+r.grade.replace("+","p"); const rec=document.querySelector("#result .record"); rec.className="record "+gc; $("gradeBox").className="gradebox "+gc;
     $("scoreNum").textContent=Math.round(r.score);
     requestAnimationFrame(()=>{ $("scoreFill").style.width=Math.max(0,Math.min(100,r.score))+"%"; });
     const lu=$("lineup"); lu.innerHTML="";
