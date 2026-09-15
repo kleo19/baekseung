@@ -183,15 +183,19 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   <section id="home" class="card">
     <div class="modes">
       <button class="mode" data-mode="standard">
-        <span class="name">정규 게임</span>
+        <span class="name">정규 모드</span>
         <span class="desc">전 포지션 + 선발진 + 불펜</span>
       </button>
+      <button class="mode" data-mode="hard">
+        <span class="name">하드 모드</span>
+        <span class="desc">기록 비공개 · 이름으로만</span>
+      </button>
       <button class="mode" data-mode="unlimited">
-        <span class="name">무제한 게임</span>
+        <span class="name">무제한 모드</span>
         <span class="desc">리롤 무제한 · 외국인 제한 없음</span>
       </button>
       <button class="mode" data-mode="quick">
-        <span class="name">빠른 게임</span>
+        <span class="name">빠른 모드</span>
         <span class="desc">베스트 5인 빠르게</span>
       </button>
     </div>
@@ -201,7 +205,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <h4>드래프트</h4>
         <ul><li>룰렛 → 연도 · 구단</li><li>그 팀에서 한 명 선택 → 자리 배치</li><li>전원 채우면 시즌 결과</li></ul>
         <h4>라인업</h4>
-        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만 · 외국인 최대 3명 (무제한 게임 제외)</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회, 무제한 ∞)</li></ul>
+        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만 · 외국인 최대 3명 (무제한 제외)</li><li>하드 모드: 기록은 결과에서만 공개</li><li>다시뽑기: 연도 · 구단 각 1회 (정규·하드 5회, 무제한 ∞)</li></ul>
         <h4>팀 평가</h4>
         <ul><li>타자: 타율 · 장타율 · 홈런 · 도루 · 실책</li><li>투수: ERA · K9 · BB9 · HR9 · H9</li><li>2001-2025 KBO 실제 팀 성적 기준</li><li>목표 100승</li></ul>
       </div>
@@ -272,7 +276,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789454709"></script>
+<script src="./game_data.js?v=1789455228"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -287,12 +291,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF","#666666"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
   const MODES = {
-    quick: { name:"빠른 게임", skipY:1, skipT:1, slots:[
+    quick: { name:"빠른 모드", skipY:1, skipT:1, slots:[
       {label:"내야", role:"H", pos:IN, x:180, y:122},
       {label:"외야", role:"H", pos:OF, x:180, y:46},
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]},
-    standard: { name:"정규 게임", skipY:5, skipT:5, slots:[
+    standard: { name:"정규 모드", skipY:5, skipT:5, slots:[
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"1루", role:"H", pos:new Set(["1B"]), x:258, y:192},
       {label:"2루", role:"H", pos:new Set(["2B"]), x:230, y:130},
@@ -305,7 +309,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       {label:"선발1", role:"SP"},{label:"선발2", role:"SP"},{label:"선발3", role:"SP"},{label:"선발4", role:"SP"},{label:"선발5", role:"SP"},
       {label:"불펜1", role:"RP"},{label:"불펜2", role:"RP"},{label:"불펜3", role:"RP"} ]}
   };
-  MODES.unlimited={ name:"무제한 게임", skipY:Infinity, skipT:Infinity, noForeignLimit:true, slots:MODES.standard.slots };
+  MODES.hard={ name:"하드 모드", skipY:MODES.standard.skipY, skipT:MODES.standard.skipT, hideStats:true, slots:MODES.standard.slots };
+  MODES.unlimited={ name:"무제한 모드", skipY:Infinity, skipT:Infinity, noForeignLimit:true, slots:MODES.standard.slots };
   const years = Object.keys(D.teams_by_year).map(Number).sort();
   const byTY = new Map();
   for (const p of D.players){ const k=p.year+"|"+p.nick; if(!byTY.has(k)) byTY.set(k,[]); byTY.get(k).push(p); }
@@ -495,7 +500,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     return list.map(x=>openPos.has(x)?`<i>${x}</i>`:x).join(" ")+(p.foreign?' <span class="fr">외</span>':"");
   }
   function renderTable(list,cols,sortKey,setSort,tableEl,sortEl){
-    const col=cols.find(c=>c[0]===sortKey); list=[...list].sort((a,b)=>col[3](a)-col[3](b));
+    const hide=!!MODES[S.mode].hideStats;
+    if (hide){ cols=[]; list=[...list].sort((a,b)=>nm(a).localeCompare(nm(b),"ko")); }
+    else { const col=cols.find(c=>c[0]===sortKey); list=[...list].sort((a,b)=>col[3](a)-col[3](b)); }
     sortEl.innerHTML="";
     for (const c of cols){ const b=document.createElement("button"); b.textContent=c[1]; b.className=c[0]===sortKey?"on":""; b.onclick=()=>{setSort(c[0]); renderCands();}; sortEl.appendChild(b); }
     const openSl=openIdx().map(i=>S.slots[i]);
