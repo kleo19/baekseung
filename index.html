@@ -186,6 +186,10 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <span class="name">정규 게임</span>
         <span class="desc">전 포지션 + 선발진 + 불펜</span>
       </button>
+      <button class="mode" data-mode="unlimited">
+        <span class="name">무제한 게임</span>
+        <span class="desc">리롤 무제한 · 외국인 제한 없음</span>
+      </button>
       <button class="mode" data-mode="quick">
         <span class="name">빠른 게임</span>
         <span class="desc">베스트 5인 빠르게</span>
@@ -197,7 +201,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <h4>드래프트</h4>
         <ul><li>룰렛 → 연도 · 구단</li><li>그 팀에서 한 명 선택 → 자리 배치</li><li>전원 채우면 시즌 결과</li></ul>
         <h4>라인업</h4>
-        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만 · 외국인 최대 3명</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회)</li></ul>
+        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만 · 외국인 최대 3명 (무제한 게임 제외)</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회, 무제한 ∞)</li></ul>
         <h4>팀 평가</h4>
         <ul><li>타자: 타율 · 장타율 · 홈런 · 도루 · 실책</li><li>투수: ERA · K9 · BB9 · HR9 · H9</li><li>2001-2025 KBO 실제 팀 성적 기준</li><li>목표 100승</li></ul>
       </div>
@@ -253,7 +257,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       </div>
       <div class="score-line">
         <div class="bar"><div class="fill" id="scoreFill" style="width:0"></div></div>
-        <div class="meta"><span>팀 점수 <b class="mono" id="scoreNum">0</b></span><span>100 = 100승</span></div>
+        <div class="meta"><span>팀 전력 <b class="mono" id="scoreNum">0</b></span><span>평균 대비</span></div>
       </div>
     </div>
     <div class="card"><div class="lineup" id="lineup"></div></div>
@@ -268,7 +272,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789453384"></script>
+<script src="./game_data.js?v=1789454709"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -301,6 +305,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       {label:"선발1", role:"SP"},{label:"선발2", role:"SP"},{label:"선발3", role:"SP"},{label:"선발4", role:"SP"},{label:"선발5", role:"SP"},
       {label:"불펜1", role:"RP"},{label:"불펜2", role:"RP"},{label:"불펜3", role:"RP"} ]}
   };
+  MODES.unlimited={ name:"무제한 게임", skipY:Infinity, skipT:Infinity, noForeignLimit:true, slots:MODES.standard.slots };
   const years = Object.keys(D.teams_by_year).map(Number).sort();
   const byTY = new Map();
   for (const p of D.players){ const k=p.year+"|"+p.nick; if(!byTY.has(k)) byTY.set(k,[]); byTY.get(k).push(p); }
@@ -317,12 +322,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 
   // ---------- 채점 (score.py와 동일) ----------
   function meanZ(list,k){ return list.length? list.reduce((s,p)=>s+p.z[k],0)/list.length : 0; }
-  function winsFromScore(s){ const w = s<=100 ? 72+0.28*s : 100+0.14*(s-100); return Math.max(0,Math.min(144,Math.round(w))); }
   function scoreLineup(H,SP,RP,mode){
     let dev=0;
     for (const k of PR.HIT) dev += PR.COEF[k]*PR.K[k]*meanZ(H,k);
     for (const k of PR.PIT) dev += PR.COEF[k]*PR.K[k]*(PR.SP_SHARE*meanZ(SP,k)+(1-PR.SP_SHARE)*meanZ(RP,k));
-    const d0=(PR.D0&&PR.D0[mode])||0; const score = 100*(dev-d0)/(PR.CAP[mode]-d0); const wins = winsFromScore(score);
+    const c=PR.CURVE[mode]||PR.CURVE.standard; const score=(dev-c.MU)/c.SD;
+    const wins=Math.max(0,Math.min(144,Math.round(c.M+c.S*score)));
     const g = PR.GRADES.find(g=>wins>=g[0]);
     return {dev,score,wins,losses:144-wins,grade:g[1],label:g[2]};
   }
@@ -338,9 +343,10 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const openIdx = () => S.slots.map((s,i)=>i).filter(i=>!S.picks[i]);
   const MAX_FOREIGN=3;
   const foreignCount=()=>S.picks.filter(q=>q&&q.foreign).length;
+  const foreignLimit=()=>MODES[S.mode].noForeignLimit?Infinity:MAX_FOREIGN;
   function fits(p,slot){
     if (p.role!==slot.role) return false;
-    if (p.foreign && foreignCount()>=MAX_FOREIGN && !S.picks.includes(p)) return false;
+    if (p.foreign && foreignCount()>=foreignLimit() && !S.picks.includes(p)) return false;
     if (slot.role!=="H" || !slot.pos) return true;
     return p.eligible.some(x=>slot.pos.has(x));
   }
@@ -417,7 +423,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     }
     // 알약 글자가 넘치면 단계 축소
     pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
-    $("fcount").textContent=`외국인 ${foreignCount()}/${MAX_FOREIGN}`;
+    $("fcount").textContent=MODES[S.mode].noForeignLimit?`외국인 ${foreignCount()}`:`외국인 ${foreignCount()}/${MAX_FOREIGN}`;
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
     if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.pending)}</b> → 자리 선택`; }
@@ -443,7 +449,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   }
   function cancelState(){ S.pending=null; S.moveFrom=null; renderSlots(); document.querySelectorAll("tr.pick.sel").forEach(r=>r.classList.remove("sel")); }
   function resetReels(){ for (const id of ["reelYear","reelTeam"]){ const r=$(id); r.classList.remove("landed","spinning"); r.querySelector("span").textContent="----"; } }
-  function updateSkip(){ $("skipLeft1").textContent=S.skipT; $("skipLeft2").textContent=S.skipY; $("skipTeam").disabled=S.skipT<=0||!S.spin; $("skipYear").disabled=S.skipY<=0||!S.spin; }
+  function updateSkip(){ const f=v=>v===Infinity?"∞":v; $("skipLeft1").textContent=f(S.skipT); $("skipLeft2").textContent=f(S.skipY); $("skipTeam").disabled=S.skipT<=0||!S.spin; $("skipYear").disabled=S.skipY<=0||!S.spin; }
   function hideCands(){ $("candCard").style.display="none"; }
 
   // ---------- 룰렛 ----------
@@ -537,8 +543,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const big=$("recBig"); big.textContent=`${r.wins}-${r.losses}`; big.classList.toggle("perfect",r.wins>=100);
     $("recGrade").textContent=r.grade; $("recLabel").textContent=r.label;
     const gc="g-"+r.grade.replace("+","p"); const rec=document.querySelector("#result .record"); rec.className="record "+gc; $("gradeBox").className="gradebox "+gc;
-    $("scoreNum").textContent=Math.round(r.score);
-    requestAnimationFrame(()=>{ $("scoreFill").style.width=Math.max(0,Math.min(100,r.score))+"%"; });
+    $("scoreNum").textContent=(r.score>=0?"+":"")+r.score.toFixed(1)+"σ";
+    requestAnimationFrame(()=>{ $("scoreFill").style.width=Math.max(0,Math.min(100,(r.score+3)/7*100))+"%"; });
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
