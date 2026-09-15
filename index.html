@@ -131,6 +131,8 @@ tr.pick.sel td{background:var(--clay-soft)}
 td .name{font-weight:700;color:var(--ink)}
 td .pos{font-size:10px;color:var(--ink-3);margin-left:3px}
 td .pos i{font-style:normal;color:var(--clay);font-weight:700}
+td .pos .fr{display:inline-block;font-size:9px;padding:0 3px;border-radius:4px;background:var(--navy-soft,#D9E3ED);color:var(--ink-2);margin-left:2px}
+.fcount{font-size:12px;color:var(--ink-3);text-align:right}
 
 tr.dim td{color:var(--ink-3)}
 tr.dim td .name{color:var(--ink-3);font-weight:500}
@@ -195,7 +197,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <h4>드래프트</h4>
         <ul><li>룰렛 → 연도 · 구단</li><li>그 팀에서 한 명 선택 → 자리 배치</li><li>전원 채우면 시즌 결과</li></ul>
         <h4>라인업</h4>
-        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회)</li></ul>
+        <ul><li>선수 선택 → 자리 지정</li><li>채운 자리 탭 → 이동 · 맞바꿈</li><li>같은 선수 한 번만 · 외국인 최대 3명</li><li>다시뽑기: 연도 · 구단 각 1회 (정규 5회)</li></ul>
         <h4>팀 평가</h4>
         <ul><li>타자: 타율 · 장타율 · 홈런 · 도루 · 실책</li><li>투수: ERA · K9 · BB9 · HR9 · H9</li><li>2001-2025 KBO 실제 팀 성적 기준</li><li>목표 100승</li></ul>
       </div>
@@ -207,6 +209,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     <div class="card field-card">
       <svg class="field" id="field" viewBox="0 0 360 300" role="img" aria-label="라인업"></svg>
       <div class="pitch" id="pitch"></div>
+      <div class="fcount" id="fcount"></div>
       <div class="status hidden" id="status"><span id="statusText"></span><button class="ghost" id="statusCancel">취소</button></div>
     </div>
     <div class="card reel-card">
@@ -265,7 +268,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="./game_data.js?v=1789449805"></script>
+<script src="./game_data.js?v=1789453384"></script>
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
@@ -333,8 +336,11 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   }
   function show(id){ for (const s of ["home","draft","result"]) $(s).classList.toggle("hidden", s!==id); window.scrollTo({top:0}); }
   const openIdx = () => S.slots.map((s,i)=>i).filter(i=>!S.picks[i]);
+  const MAX_FOREIGN=3;
+  const foreignCount=()=>S.picks.filter(q=>q&&q.foreign).length;
   function fits(p,slot){
     if (p.role!==slot.role) return false;
+    if (p.foreign && foreignCount()>=MAX_FOREIGN && !S.picks.includes(p)) return false;
     if (slot.role!=="H" || !slot.pos) return true;
     return p.eligible.some(x=>slot.pos.has(x));
   }
@@ -411,6 +417,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     }
     // 알약 글자가 넘치면 단계 축소
     pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
+    $("fcount").textContent=`외국인 ${foreignCount()}/${MAX_FOREIGN}`;
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
     if (S.pending){ st.classList.remove("hidden"); $("statusText").innerHTML=`<b>${nm(S.pending)}</b> → 자리 선택`; }
@@ -477,9 +484,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   const HCOLS=[["AVG","타율",p=>fmt3(p.AVG),p=>-p.AVG],["SLG","장타",p=>fmt3(p.SLG),p=>-p.SLG],["HR","홈런",p=>p.HR,p=>-p.HR],["SB","도루",p=>p.SB,p=>-p.SB],["E","실책",p=>p.E,p=>p.E],["G","경기",p=>p.G,p=>-p.G]];
   const PCOLS=[["ERA","ERA",p=>fmt2(p.ERA),p=>p.ERA],["IP","이닝",p=>Math.round(p.IP),p=>-p.IP],["k9","K9",p=>fmt1(p.k9),p=>-p.k9],["bb9","BB9",p=>fmt1(p.bb9),p=>p.bb9],["hr9","HR9",p=>fmt1(p.hr9),p=>p.hr9],["h9","H9",p=>fmt1(p.h9),p=>p.h9]];
   function posLabel(p,openPos){
-    if (p.role!=="H") return p.role==="SP"?"선발":"불펜";
+    if (p.role!=="H") return (p.role==="SP"?"선발":"불펜")+(p.foreign?' <span class="fr">외</span>':"");
     const list = p.dh_only ? ["DH"] : p.eligible.filter(x=>x!=="DH");
-    return list.map(x=>openPos.has(x)?`<i>${x}</i>`:x).join(" ");
+    return list.map(x=>openPos.has(x)?`<i>${x}</i>`:x).join(" ")+(p.foreign?' <span class="fr">외</span>':"");
   }
   function renderTable(list,cols,sortKey,setSort,tableEl,sortEl){
     const col=cols.find(c=>c[0]===sortKey); list=[...list].sort((a,b)=>col[3](a)-col[3](b));
