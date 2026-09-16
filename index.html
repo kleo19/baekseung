@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>백승구단</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Sans:wght@500;700&display=swap">
 <style>
 :root{
   --bg:#F1F3EE; --surface:#FFFFFF; --surface-2:#E7EBE3; --line:#CDD4C9;
   --ink:#1C2A23; --ink-2:#4E5C55; --ink-3:#7E8A83;
   --clay:#B85E27; --clay-ink:#FFFFFF; --clay-soft:#F4DCCB;
   --grass:#2E7A4B; --grass-soft:#D8EBDD;
-  --f-grass:#5E9B6B; --f-grass-2:#6FA97A; --f-dirt:#C99A6A; --f-line:#FFFFFF; --f-fence:#3E6B4A;
+  --f-grass:#5E9B6B; --f-grass-2:#6FA97A; --f-dirt:#C99A6A; --f-line:#FFFFFF; --f-fence:#3E6B4A; --f-stand:#CFCBC2;
   --shadow:0 1px 2px rgba(28,42,35,.08),0 8px 24px rgba(28,42,35,.08);
 }
 @media (prefers-color-scheme: dark){
@@ -21,7 +21,7 @@
     --ink:#E9EEE6; --ink-2:#B4C0B2; --ink-3:#7F8E7D;
     --clay:#D97A3C; --clay-ink:#1A120C; --clay-soft:#3E2A1B;
     --grass:#5DBE7F; --grass-soft:#1F3A29;
-    --f-grass:#2F5C3B; --f-grass-2:#36694A; --f-dirt:#8A5E3A; --f-line:#D8E0D4; --f-fence:#1E3A28;
+    --f-grass:#2F5C3B; --f-grass-2:#36694A; --f-dirt:#8A5E3A; --f-line:#D8E0D4; --f-fence:#1E3A28; --f-stand:#4A4A48;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
   }
 }
@@ -30,17 +30,18 @@
   --ink:#E9EEE6; --ink-2:#B4C0B2; --ink-3:#7F8E7D;
   --clay:#D97A3C; --clay-ink:#1A120C; --clay-soft:#3E2A1B;
   --grass:#5DBE7F; --grass-soft:#1F3A29;
-  --f-grass:#2F5C3B; --f-grass-2:#36694A; --f-dirt:#8A5E3A; --f-line:#D8E0D4; --f-fence:#1E3A28;
+  --f-grass:#2F5C3B; --f-grass-2:#36694A; --f-dirt:#8A5E3A; --f-line:#D8E0D4; --f-fence:#1E3A28; --f-stand:#4A4A48;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 html,body{margin:0;overflow-x:hidden;max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.mono{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 .display{font-family:"Black Han Sans","IBM Plex Sans KR",sans-serif;font-weight:400;letter-spacing:-.01em}
 .app{max-width:520px;margin:0 auto;padding:16px 12px 48px;display:flex;flex-direction:column;gap:14px}
 .app>*,.card,.sec{min-width:0}
-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0 0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 0}
+header #quit{padding:4px 10px;font-size:12px;border-radius:999px}
 header .logo{font-size:40px;line-height:1;color:var(--ink)}
 header .logo em{font-style:normal;color:var(--clay)}
 header .tag{font-size:12px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
@@ -80,14 +81,14 @@ button.ghost{background:transparent}
 .mk .lbl{font-size:10px;fill:var(--ink-3)}
 .mk.target .lbl{fill:var(--clay);font-weight:700}
 .mk .nm{font-size:12px;font-weight:700}
-.mk .nm tspan.yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75}
+.mk .nm tspan.yr{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-weight:500;opacity:.75;font-variant-numeric:tabular-nums}
 .mk .sub{font-size:9px;opacity:.8}
 .pitch{display:grid;gap:6px;padding:2px 2px 0}
 .pitch-row{display:flex;gap:4px;align-items:center;flex-wrap:nowrap}
 .pitch-row .rl{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink-3);width:26px}
-.pill{flex:1 1 0;min-width:0;font-size:11px;padding:6px 3px;border-radius:999px;border:2px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.pill{flex:1 1 auto;min-width:0;font-size:11px;padding:6px 3px;border-radius:999px;border:2px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .pill.done{border-style:solid;cursor:pointer;font-weight:700}
-.pill.done .yr{font-family:"IBM Plex Mono",monospace;font-weight:500;opacity:.75;margin-right:2px;font-size:.85em}
+.pill.done .yr{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-weight:500;opacity:.75;margin-right:2px;font-size:.85em;font-variant-numeric:tabular-nums}
 .pill.s1{font-size:10px;padding-left:2px;padding-right:2px}.pill.s2{font-size:9px}
 .pill.target{border:2px solid var(--clay);color:var(--clay);background:var(--clay-soft);cursor:pointer;font-weight:700}
 .pill.from{box-shadow:0 0 0 2px var(--clay)}
@@ -120,11 +121,15 @@ table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}
 .tbl-wrap{margin-top:4px;width:100%;overflow:hidden}
 th,td{padding:9px 3px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:clip;border-bottom:1px solid var(--line)}
 th{font-size:11px;letter-spacing:.02em;color:var(--ink-3);font-weight:500}
-th:first-child,td:first-child{text-align:left;padding-left:0;width:25%}
-td.who.t1{font-size:12px}td.who.t1 .pos{font-size:9px}
-td.who.t2{font-size:11px}td.who.t2 .pos{font-size:8px;margin-left:2px}
-td.who.t3{font-size:10px}td.who.t3 .pos{display:none}
-td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left;padding-left:0;width:28%}
+td.who.t1 .pos{font-size:8.5px;margin-left:2px}
+td.who.t2 .pos{font-size:8px;margin-left:2px}
+td.who.t3 .pos{font-size:7.5px;margin-left:1px}
+td.who.t4{font-size:13px}td.who.t4 .pos{font-size:7px;margin-left:1px}
+td.who.t5{font-size:12px}td.who.t5 .pos{font-size:6.5px}
+td.who.t6{font-size:11px}td.who.t6 .pos{font-size:6px;letter-spacing:-.02em}
+td.who.t3 .pos .fr,td.who.t4 .pos .fr,td.who.t5 .pos .fr,td.who.t6 .pos .fr{font-size:6.5px;padding:0 2px}
+td.num{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 tr.pick{cursor:pointer}
 tr.pick:hover td{background:var(--surface-2)}
 tr.pick.sel td{background:var(--clay-soft)}
@@ -164,7 +169,7 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .lineup .dot{width:12px;height:12px;border-radius:50%}
 .lineup .who b{display:block}
 .lineup .who span{font-size:12px;color:var(--ink-3)}
-.lineup .st{font-size:12px;color:var(--ink-2);text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.lineup .st{font-size:12px;color:var(--ink-2);text-align:right;font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.show{opacity:1}
@@ -176,7 +181,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 <div class="app">
   <header>
     <div class="logo display">백승<em>구단</em></div>
-    <div class="tag">KBO 올타임 로스터</div>
+    <div class="tag" id="hdrTag">KBO 올타임 로스터</div>
+    <button class="ghost" id="quit" hidden>처음으로</button>
   </header>
 
   <!-- HOME -->
@@ -193,6 +199,10 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       <button class="mode" data-mode="unlimited">
         <span class="name">무제한 모드</span>
         <span class="desc">리롤 무제한 · 외국인 제한 없음</span>
+      </button>
+      <button class="mode" data-mode="special">
+        <span class="name">스페셜 모드 · <b id="spTitle"></b></span>
+        <span class="desc" id="spDesc"></span>
       </button>
       <button class="mode" data-mode="quick">
         <span class="name">빠른 모드</span>
@@ -215,7 +225,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   <!-- DRAFT -->
   <section id="draft" class="hidden" style="display:grid;gap:12px">
     <div class="card field-card">
-      <svg class="field" id="field" viewBox="0 0 360 300" role="img" aria-label="라인업"></svg>
+      <svg class="field" id="field" viewBox="0 0 360 316" role="img" aria-label="라인업"></svg>
       <div class="pitch" id="pitch"></div>
       <div class="fcount" id="fcount"></div>
       <div class="status hidden" id="status"><span id="statusText"></span><button class="ghost" id="statusCancel">취소</button></div>
@@ -230,7 +240,6 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <button id="skipYear">연도 다시뽑기 <b id="skipLeft2"></b></button>
         <button id="skipTeam">구단 다시뽑기 <b id="skipLeft1"></b></button>
       </div>
-      <div class="reel-head"><button class="ghost" id="quit" style="padding:2px 8px;font-size:12px">처음으로</button></div>
     </div>
     <div class="card" id="candCard" style="display:none">
       <div class="from" id="fromLabel"></div>
@@ -261,7 +270,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       </div>
       <div class="score-line">
         <div class="bar"><div class="fill" id="scoreFill" style="width:0"></div></div>
-        <div class="meta"><span>팀 전력 <b class="mono" id="scoreNum">0</b></span><span>평균 대비</span></div>
+        <div class="meta"><span>팀 전력 <b class="mono" id="scoreNum">0</b>점</span></div>
       </div>
     </div>
     <div class="card"><div class="lineup" id="lineup"></div></div>
@@ -303,7 +312,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       {label:"3루", role:"H", pos:new Set(["3B"]), x:102, y:192},
       {label:"유격", role:"H", pos:new Set(["SS"]), x:130, y:130},
       {label:"좌익", role:"H", pos:new Set(["LF"]), x:88, y:86},
-      {label:"중견", role:"H", pos:new Set(["CF"]), x:180, y:48},
+      {label:"중견", role:"H", pos:new Set(["CF"]), x:180, y:66},
       {label:"우익", role:"H", pos:new Set(["RF"]), x:272, y:86},
       {label:"지명", role:"H", pos:null, x:52, y:270},
       {label:"선발1", role:"SP"},{label:"선발2", role:"SP"},{label:"선발3", role:"SP"},{label:"선발4", role:"SP"},{label:"선발5", role:"SP"},
@@ -311,7 +320,16 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   };
   MODES.hard={ name:"하드 모드", skipY:MODES.standard.skipY, skipT:MODES.standard.skipT, hideStats:true, slots:MODES.standard.slots };
   MODES.unlimited={ name:"무제한 모드", skipY:Infinity, skipT:Infinity, noForeignLimit:true, slots:MODES.standard.slots };
-  const years = Object.keys(D.teams_by_year).map(Number).sort();
+  // 스페셜 모드: 회차마다 교체. nicks = 룰렛에 나올 구단 애칭, years = 연도 제한(null이면 전체)
+  const SPECIAL={ title:"엘롯기", desc:"트윈스 · 자이언츠 · 타이거즈만", nicks:["트윈스","자이언츠","타이거즈"], years:null };
+  MODES.special={ name:"스페셜 모드 · "+SPECIAL.title, skipY:5, skipT:5, nicks:new Set(SPECIAL.nicks), yearFilter:SPECIAL.years, slots:MODES.standard.slots };
+  const yearsAll = Object.keys(D.teams_by_year).map(Number).sort();
+  const modeNicks = () => MODES[S.mode] && MODES[S.mode].nicks;
+  const yearsOf = () => { const nk=modeNicks(), yf=MODES[S.mode]&&MODES[S.mode].yearFilter;
+    let ys=yearsAll; if (yf) ys=ys.filter(y=>yf.includes(y));
+    if (nk) ys=ys.filter(y=>Object.keys(D.teams_by_year[y]).some(n=>nk.has(n))); return ys; };
+  const nicksOf = y => { const nk=modeNicks(); const ns=Object.keys(D.teams_by_year[y]); return nk?ns.filter(n=>nk.has(n)):ns; };
+  const years = yearsAll;
   const byTY = new Map();
   for (const p of D.players){ const k=p.year+"|"+p.nick; if(!byTY.has(k)) byTY.set(k,[]); byTY.get(k).push(p); }
   const allNicks=[...new Set(D.players.map(p=>p.nick))];
@@ -344,7 +362,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
        spin:null, cands:[], sortH:"SLG", sortP:"ERA", pending:null, moveFrom:null};
     show("draft"); drawField(); renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
-  function show(id){ for (const s of ["home","draft","result"]) $(s).classList.toggle("hidden", s!==id); window.scrollTo({top:0}); }
+  function show(id){ for (const s of ["home","draft","result"]) $(s).classList.toggle("hidden", s!==id); $("quit").hidden=id==="home"; $("hdrTag").hidden=id!=="home"; window.scrollTo({top:0}); }
   const openIdx = () => S.slots.map((s,i)=>i).filter(i=>!S.picks[i]);
   const MAX_FOREIGN=3;
   const foreignCount=()=>S.picks.filter(q=>q&&q.foreign).length;
@@ -369,33 +387,63 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   // ---------- 야구장 ----------
   const NS="http://www.w3.org/2000/svg";
   function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for (const k in attrs) if(attrs[k]!=null) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
-  function drawField(){
-    const f=$("field"); f.innerHTML="";
-    const g=el("g",{},f);
-    // 외야 잔디 + 펜스 (홈 뒤쪽까지 잔디)
-    el("ellipse",{cx:180,cy:256,rx:62,ry:32,fill:"var(--f-grass)"},g);   // 홈 뒤 백스톱 잔디
-    // 파울라인은 홈→1루/3루 베이스 라인의 연장(45도). 펜스 끝점 (40,118)/(320,118)
-    el("path",{d:"M180 258 L40 118 A150 150 0 0 1 320 118 Z",fill:"var(--f-grass)"},g);
-    el("path",{d:"M40 118 A150 150 0 0 1 320 118",fill:"none",stroke:"var(--f-fence)","stroke-width":"5"},g);
-    // 내야 흙: 베이스 바깥까지 넉넉히
-    el("path",{d:"M180 284 L72 176 A140 140 0 0 1 288 176 Z",fill:"var(--f-dirt)"},g);
-    // 베이스 다이아몬드: 홈(180,258) 1루(232,206) 2루(180,154) 3루(128,206). 안쪽 잔디는 주로가 보이게 살짝 작게
-    el("polygon",{points:"180,246 220,206 180,166 140,206",fill:"var(--f-grass-2)"},g);
-    el("polygon",{points:"180,258 232,206 180,154 128,206",fill:"none",stroke:"var(--f-line)","stroke-width":"1.5",opacity:".95"},g);
-    // 파울라인: 홈에서 펜스까지
-    el("path",{d:"M180 258 L40 118 M180 258 L320 118",stroke:"var(--f-line)","stroke-width":"1.5",fill:"none",opacity:".9"},g);
-    // 베이스, 홈플레이트, 마운드
-    for (const [x,y] of [[232,206],[180,154],[128,206]]) el("rect",{x:x-4.5,y:y-4.5,width:9,height:9,fill:"var(--f-line)",transform:`rotate(45 ${x} ${y})`},g);
-    el("polygon",{points:"180,264 187,257 187,251 173,251 173,257",fill:"var(--f-line)"},g);
-    el("circle",{cx:180,cy:206,r:8,fill:"var(--f-dirt)",stroke:"var(--f-line)","stroke-width":"1"},g);
-    el("rect",{x:177,y:205,width:6,height:2,fill:"var(--f-line)"},g);
-    el("g",{id:"markers"},f);
+  // 그림 스타일: flat(평면, 기본) | iso(살짝 입체, ?field=iso 미리보기)
+  const FIELD_STYLE=(new URLSearchParams(location.search).get("field"))||"flat";
+  const FM = FIELD_STYLE==="iso" ? (x,y)=>{ const k=0.78+0.22*(y/316); return [180+(x-180)*k, 8+y*0.97]; } : (x,y)=>[x,y];
+  const rad=d=>d*Math.PI/180;
+  function arcPts(cx,cy,r,a0,a1,n=56){ const o=[]; for(let i=0;i<=n;i++){ const a=rad(a0+(a1-a0)*i/n); o.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]); } return o; }
+  function circPts(cx,cy,r){ return arcPts(cx,cy,r,0,360,48); }
+  function poly(pts,attrs,parent){ const d="M"+pts.map(p=>{const q=FM(p[0],p[1]);return q[0].toFixed(1)+" "+q[1].toFixed(1);}).join("L")+"Z"; return el("path",Object.assign({d},attrs),parent); }
+  function pline(pts,attrs,parent){ const d="M"+pts.map(p=>{const q=FM(p[0],p[1]);return q[0].toFixed(1)+" "+q[1].toFixed(1);}).join("L"); return el("path",Object.assign({d,fill:"none"},attrs),parent); }
+  // 직선 A+t*d 와 원(C,R)의 교점 중 t>0 최소
+  function rayCircle(A,d,C,R){
+    const fx=A[0]-C[0], fy=A[1]-C[1];
+    const b=2*(fx*d[0]+fy*d[1]), c=fx*fx+fy*fy-R*R, disc=b*b-4*c;
+    if (disc<0) return null; const t=(-b+Math.sqrt(disc))/2;
+    return [A[0]+t*d[0], A[1]+t*d[1]];
   }
-  function shortName(n){ return n.length>6? n.slice(0,6) : n; }
+  const ang=(C,p)=>Math.atan2(p[1]-C[1],p[0]-C[0])*180/Math.PI;
+  function drawFieldNew(f,iso){
+    const g=el("g",{},f);
+    const H=[180,258], M=[180,209];                       // 홈, 마운드 (1ft≈0.82px)
+    const FC=[180,186], FR=152;                            // 펜스 호 중심·반지름 (넓게 펴진 부채꼴)
+    const S2=Math.SQRT1_2, dL=[-S2,-S2], dR=[S2,-S2];      // 파울선 방향
+    const poleL=rayCircle(H,dL,FC,FR), poleR=rayCircle(H,dR,FC,FR);   // 파울선이 펜스와 만나는 점
+    const PAD=26;                                          // 파울선 바깥 잔디 띠 폭
+    const oL=[H[0]-PAD*S2,H[1]+PAD*S2], oR=[H[0]+PAD*S2,H[1]+PAD*S2]; // 홈 뒤 캡의 접점
+    const eL=rayCircle(oL,dL,FC,FR), eR=rayCircle(oR,dR,FC,FR);       // 띠 바깥선과 펜스의 교점
+    const A0=ang(FC,eL), A1=ang(FC,eR);
+    const fan=[...arcPts(H[0],H[1],PAD,135,45,20).reverse(),eL,...arcPts(FC[0],FC[1],FR,A0,A1),eR];
+    poly(fan,{fill:"var(--f-grass)"},g);
+    if (iso){ poly([...arcPts(H[0],H[1],PAD+16,135,45,20).reverse(),...arcPts(FC[0],FC[1],FR+15,A0-1,A1+1)],{fill:"var(--f-stand)"},g); poly(fan,{fill:"var(--f-grass)"},g); }
+    // 외야 세로 줄무늬
+    const cid="fanClip"+(iso?"I":"F"); const cp=el("clipPath",{id:cid},el("defs",{},f)); poly(fan,{},cp);
+    const sg=el("g",{"clip-path":`url(#${cid})`},g);
+    for (let x=12;x<348;x+=48) poly([[x,10],[x+24,10],[x+24,300],[x,300]],{fill:"var(--f-grass-2)",opacity:".55"},sg);
+    // 내야 흙: 파울라인 + 마운드 중심 호(95ft) + 홈 원
+    const r=77.6, IL=[H[0]-73.6,H[1]-73.6], IR=[H[0]+73.6,H[1]-73.6];
+    poly([H,IL,...arcPts(M[0],M[1],r,ang(M,IL),ang(M,IR)),IR],{fill:"var(--f-dirt)"},g);
+    poly(circPts(H[0],H[1],13),{fill:"var(--f-dirt)"},g);
+    poly([[180,240],[218,206],[180,168],[142,206]],{fill:"var(--f-grass-2)"},g);   // 내야 잔디
+    poly(circPts(M[0],M[1],7.5),{fill:"var(--f-dirt)"},g);                          // 마운드
+    // 파울라인 (홈 → 펜스까지 끝까지)
+    pline([poleL,H,poleR],{stroke:"var(--f-line)","stroke-width":"1.5",opacity:".95"},g);
+    // 워닝트랙 + 펜스 (부채꼴 안쪽으로 클립해 파울 지역 끝과 맞물림)
+    const tg=el("g",{"clip-path":`url(#${cid})`},g);
+    poly([...arcPts(FC[0],FC[1],FR,A0,A1),...arcPts(FC[0],FC[1],FR-9,A1,A0)],{fill:"var(--f-dirt)",opacity:".85"},tg);
+    pline(arcPts(FC[0],FC[1],FR-1.5,A0,A1),{stroke:"var(--f-fence)","stroke-width":"3"},tg);
+    // 베이스, 홈플레이트, 투수판
+    for (const [x,y] of [[232,206],[180,154],[128,206]]){ const q=FM(x,y); el("rect",{x:q[0]-4,y:q[1]-4,width:8,height:8,fill:"var(--f-line)",transform:`rotate(45 ${q[0]} ${q[1]})`},g); }
+    { const q=FM(H[0],H[1]); el("polygon",{points:`${q[0]},${q[1]+5} ${q[0]+6},${q[1]-1} ${q[0]+6},${q[1]-6} ${q[0]-6},${q[1]-6} ${q[0]-6},${q[1]-1}`,fill:"var(--f-line)"},g); }
+    { const q=FM(M[0],M[1]); el("rect",{x:q[0]-3,y:q[1]-1,width:6,height:2,fill:"var(--f-line)"},g); }
+    if (iso) for (const p of [poleL,poleR]){ const q=FM(p[0],p[1]); el("rect",{x:q[0]-1.5,y:q[1]-14,width:3,height:14,fill:"#F2C400"},g); }
+  }
+  function drawField(){ const f=$("field"); f.innerHTML=""; drawFieldNew(f,FIELD_STYLE==="iso"); el("g",{id:"markers"},f); }
+  function shortName(n){ return n.length>7? n.slice(0,7) : n; }
   function marker(parent,s,i,p,tg){
     const cls="mk"+(p?" done":"")+(tg?" target":"")+(S.moveFrom===i?" from":"");
     const grp=el("g",{class:cls,tabindex:(p||tg)?"0":null,role:(p||tg)?"button":null},parent);
-    const w=68,h=30;
+    const h=30, w=p?Math.max(68,Math.round(34+12.5*shortName(nm(p)).length)):68; const [mx,my]=FM(s.x,s.y); s={...s,x:mx,y:my};
     const ring=el("rect",{class:"ring",x:s.x-w/2,y:s.y-h/2,width:w,height:h,rx:h/2},grp);
     if (p){
       const [bg,fg,bd]=colorOf(p.nick); ring.style.fill=bg; if(!tg){ ring.style.stroke=bd; ring.style.strokeWidth="2.5"; }
@@ -427,7 +475,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       }
     }
     // 알약 글자가 넘치면 단계 축소
-    pitch.querySelectorAll(".pill.done").forEach(b=>{ for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } });
+    fitPills();
     $("fcount").textContent=MODES[S.mode].noForeignLimit?`외국인 ${foreignCount()}`:`외국인 ${foreignCount()}/${MAX_FOREIGN}`;
     // 상태줄 (배치·이동 대기 중에만)
     const st=$("status");
@@ -462,8 +510,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const open=openIdx().map(i=>S.slots[i]);
     for (let t=0;t<120;t++){
       let y,nick;
-      if (lock.nick){ const ys=years.filter(v=>D.teams_by_year[v][lock.nick] && v!==exclude.y); if(!ys.length) return null; y=rnd(ys); nick=lock.nick; }
-      else { y=lock.y||rnd(years); const ns=Object.keys(D.teams_by_year[y]).filter(n=>n!==exclude.nick); if(!ns.length) return null; nick=rnd(ns); }
+      if (lock.nick){ const ys=yearsOf().filter(v=>D.teams_by_year[v][lock.nick] && v!==exclude.y); if(!ys.length) return null; y=rnd(ys); nick=lock.nick; }
+      else { y=lock.y||rnd(yearsOf()); const ns=nicksOf(y).filter(n=>n!==exclude.nick); if(!ns.length) return null; nick=rnd(ns); }
       const all=(byTY.get(y+"|"+nick)||[]).filter(p=>!S.used.has(person(p)));
       if (all.some(p=>open.some(sl=>fits(p,sl)))) return {y,nick,cands:all};
     }
@@ -478,7 +526,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const dur=(reduced||window.__instant)?0:1100; const t0=performance.now();
     ry.classList.add("spinning"); rt.classList.add("spinning");
     function tick(now){
-      if (now-t0<dur){ if(!lock.y) ry.querySelector("span").textContent=rnd(years); if(!lock.nick) rt.querySelector("span").textContent=rnd(allNicks); requestAnimationFrame(tick); }
+      if (now-t0<dur){ if(!lock.y) ry.querySelector("span").textContent=rnd(yearsOf()); if(!lock.nick) rt.querySelector("span").textContent=rnd(modeNicks()?[...modeNicks()]:allNicks); requestAnimationFrame(tick); }
       else land();
     }
     function land(){
@@ -499,6 +547,17 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const list = p.dh_only ? ["DH"] : p.eligible.filter(x=>x!=="DH");
     return list.map(x=>openPos.has(x)?`<i>${x}</i>`:x).join(" ")+(p.foreign?' <span class="fr">외</span>':"");
   }
+  function fitPills(){ document.querySelectorAll("#pitch .pill.done").forEach(b=>{ b.classList.remove("s1","s2"); for (const c of ["s1","s2"]){ if (b.scrollWidth<=b.clientWidth) break; b.classList.add(c); } }); }
+  const SHRINK=["t1","t2","t3","t4","t5","t6"];
+  function fitCells(tableEl){   // 넘치는 선수 칸만 단계적으로 축소. 웹폰트 로드 후 다시 실행해야 정확함
+    tableEl.querySelectorAll("td.who").forEach(td=>{
+      SHRINK.forEach(c=>td.classList.remove(c));
+      for (const c of SHRINK){ if (td.scrollWidth<=td.clientWidth) break; td.classList.add(c); }
+    });
+  }
+  function refitAll(){ document.querySelectorAll("table").forEach(fitCells); fitPills(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>setTimeout(refitAll,0));
+  window.addEventListener("resize",refitAll);
   function renderTable(list,cols,sortKey,setSort,tableEl,sortEl){
     const hide=!!MODES[S.mode].hideStats;
     if (hide){ cols=[]; list=[...list].sort((a,b)=>nm(a).localeCompare(nm(b),"ko")); }
@@ -514,7 +573,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     }
     tableEl.innerHTML=html+"</tbody>";
     // 이름 칸이 넘치는 행만 단계적으로 글자 축소
-    tableEl.querySelectorAll("td.who").forEach(td=>{ for (const c of ["t1","t2","t3"]){ if (td.scrollWidth<=td.clientWidth) break; td.classList.add(c); } });
+    fitCells(tableEl);
     tableEl.querySelectorAll("tr.pick").forEach(r=>r.onclick=()=>choose(r.dataset.id));
   }
   function renderCands(){
@@ -550,8 +609,8 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const big=$("recBig"); big.textContent=`${r.wins}-${r.losses}`; big.classList.toggle("perfect",r.wins>=100);
     $("recGrade").textContent=r.grade; $("recLabel").textContent=r.label;
     const gc="g-"+r.grade.replace("+","p"); const rec=document.querySelector("#result .record"); rec.className="record "+gc; $("gradeBox").className="gradebox "+gc;
-    $("scoreNum").textContent=(r.score>=0?"+":"")+r.score.toFixed(1)+"σ";
-    requestAnimationFrame(()=>{ $("scoreFill").style.width=Math.max(0,Math.min(100,(r.score+3)/7*100))+"%"; });
+    const pts=Math.max(0,Math.min(100,Math.round(50+10*r.score))); $("scoreNum").textContent=pts;
+    requestAnimationFrame(()=>{ $("scoreFill").style.width=pts+"%"; });
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
@@ -571,6 +630,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   $("toHome").onclick=()=>show("home");
   $("statusCancel").onclick=cancelState;
   $("share").onclick=async()=>{ try{ await navigator.clipboard.writeText(shareText()); toast("복사 완료"); }catch(e){ toast("복사 실패"); } };
+  $("spTitle").textContent=SPECIAL.title; $("spDesc").textContent=SPECIAL.desc;
   const qs=new URLSearchParams(location.search), qm=qs.get("mode"); if (MODES[qm]){ start(qm); if(qs.get("spin")){ window.__instant=true; spin(); }
     if (qs.get("scenario")==="move"){ // 테스트: CF/LF 겸업 타자를 CF에 넣고, CF 전용 타자 팀을 뽑은 뒤 이동 → CF 전용 타자가 선택 가능해지는지
       window.__instant=true;
@@ -591,6 +651,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       onSlotTap(cf);                  // CF에 배치
       document.title="SCENARIO 1차목적지="+t1+" | "+mode+" | 2차목적지="+t2+" | CF="+(S.picks[cf]&&S.picks[cf].name)+" LF="+(S.picks[lf]&&S.picks[lf].name);
     }
+    if (qs.get("y")&&qs.get("nick")){ const y=+qs.get("y"), nick=qs.get("nick"); S.spin={y,nick}; S.cands=byTY.get(y+"|"+nick)||[]; renderCands(); updateSkip(); $("spin").disabled=true; }   // 테스트: 특정 연도·구단 강제
     if (qs.get("auto")||qs.get("fill")){ // 테스트: 전략 없는 자동 플레이 (타율+장타율 / ERA 1위, 스킵 없음). fill=N 이면 N자리만
       window.__instant=true; let left = qs.get("fill") ? parseInt(qs.get("fill")) : 999;
       while (openIdx().length && left-- > 0){
@@ -601,6 +662,10 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         const i=openIdx().find(i=>fits(best,S.slots[i])); place(best,i);
       }
       if (S.result) document.title = "AUTO " + JSON.stringify(S.result);
+      if (qs.get("pick") && !S.result){ // 테스트: 한 번 더 돌리고 후보 1명 선택(대기 상태) 캡처용
+        spin(); const open=openIdx().map(i=>S.slots[i]); const ok=S.cands.filter(p=>open.some(sl=>fits(p,sl)));
+        const best=ok.reduce((a,p)=>{ const v=p.role==="H"?(p.AVG+p.SLG):-p.ERA; return (!a||v>a.v)?{p,v}:a; },null).p; choose(best.id); window.scrollTo(0,0);
+      }
     } }
 })();
 </script>
