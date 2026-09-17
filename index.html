@@ -200,13 +200,13 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
         <span class="name">무제한 모드</span>
         <span class="desc">리롤 무제한 · 외국인 제한 없음</span>
       </button>
+      <button class="mode" data-mode="legend">
+        <span class="name">레전드 모드</span>
+        <span class="desc">1982년 원년부터 전 구간</span>
+      </button>
       <button class="mode" data-mode="special">
         <span class="name">스페셜 모드 · <b id="spTitle"></b></span>
         <span class="desc" id="spDesc"></span>
-      </button>
-      <button class="mode" data-mode="quick">
-        <span class="name">빠른 모드</span>
-        <span class="desc">베스트 5인 빠르게</span>
       </button>
     </div>
     <details class="rules">
@@ -274,7 +274,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       </div>
     </div>
     <div class="card"><div class="lineup" id="lineup"></div></div>
-    <div class="result-actions">
+    <div class="result-actions" id="resultActions">
       <button class="primary" id="again">다시</button>
       <button id="share">결과 복사</button>
     </div>
@@ -289,23 +289,43 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
 <script>
 (function(){
   const D = window.GAME_DATA; const PR = D.params;
-  const IN = new Set(["1B","2B","3B","SS"]), OF = new Set(["LF","CF","RF"]);
   // 구단 색: [배경, 글자]
-  const TEAM_COLORS = {   // [배경, 글자, 테두리] — 테두리 '없음'은 배경과 같은 색 (크기 동일)
-    "라이온즈":["#074CA1","#FFFFFF","#074CA1"], "타이거즈":["#EA0029","#FFFFFF","#111111"], "베어스":["#131230","#FFFFFF","#E4002B"],
-    "트윈스":["#C30452","#FFFFFF","#111111"], "자이언츠":["#FFFFFF","#041E42","#C7102E"], "이글스":["#F37321","#111111","#F37321"],
-    "히어로즈":["#570514","#FFFFFF","#C9A227"], "와이번스":["#FFFFFF","#CE0E2D","#CE0E2D"], "랜더스":["#CE0E2D","#FFD400","#FFD400"],
-    "유니콘스":["#0B5A3C","#FFFFFF","#C9A227"], "다이노스":["#315288","#E4C9A1","#315288"], "위즈":["#000000","#FFFFFF","#000000"]
+  // 팀 색 [배경, 글자, 테두리]. 키 = 그 시즌 앞이름(히어로즈만 구단 이름).
+  // 1982-2000 구단 색은 기억에 의존한 근사값이라 추후 유니폼 확인 후 보정 필요.
+  // 팀 색 [배경, 글자, 테두리]. 키 = 그 시즌 앞이름(히어로즈만 구단 이름).
+  // 출처: 위키백과 "틀:야구 주요 색". 해태·빙그레·OB는 해당 틀에 없어 별도로 정함.
+  // 팀 색 [배경, 글자, 테두리]. 키 = 그 시즌 앞이름(히어로즈만 구단 이름).
+  // 출처: 위키백과 "틀:야구 주요 색". 해태·빙그레·OB는 그 틀에 없어 따로 정함.
+  // 팀 색 [배경, 글자, 테두리]. 키 = 그 시즌 앞이름(히어로즈만 구단 이름).
+  // 출처: 위키백과 "틀:야구 주요 색". 해태·빙그레·OB는 그 틀에 없어 자료 조사로 따로 정함.
+  // 팀 색 [배경, 글자, 테두리]. 키 = 그 시즌 앞이름(히어로즈만 구단 이름).
+  // 출처: 위키백과 "틀:야구 주요 색". 해태·빙그레·OB는 그 틀에 없어 자료 조사로 따로 정함.
+  const TEAM_COLORS = {
+    "삼성":["#074CA1","#FFFFFF","#C0C0C0"],   // 라이온즈 82-25 · 공식
+    "롯데":["#FFFFFF","#041E42","#D00F31"],   // 자이언츠 82-25 · 공식
+    "LG":["#C30452","#FFFFFF","#000000"],   // 트윈스 90-25 · 공식
+    "두산":["#1A1748","#FFFFFF","#EB1D25"],   // 베어스 99-25 · 공식
+    "KIA":["#EA0029","#FFFFFF","#06141F"],   // 타이거즈 01-25 · 공식
+    "한화":["#FC4E00","#FFFFFF","#07111F"],   // 이글스 94-25 · 공식
+    "SSG":["#CE0E2D","#FFB81C","#FFB81C"],   // 랜더스 21-25 · 공식
+    "히어로즈":["#570514","#FFFFFF","#B07F4A"],   // 히어로즈 08-25 · 공식
+    "NC":["#315288","#E4C9A1","#AF917B"],   // 다이노스 13-25 · 공식
+    "KT":["#000000","#FFFFFF","#FFFFFF"],   // 위즈 15-25 · 공식 · 테두리만 흰색
+    "SK":["#FFFFFF","#FF0000","#FF6600"],   // 와이번스 00-20 · 공식
+    "현대":["#007F55","#FAB93D","#000000"],   // 유니콘스 96-07 · 공식
+    "MBC":["#1552F8","#FFFF00","#224488"],   // 청룡 82-89 · 공식
+    "태평양":["#224433","#FF9933","#FF9933"],   // 돌핀스 88-95 · 공식
+    "청보":["#E72025","#FFFFFF","#FFFFFF"],   // 핀토스 85-87 · 공식+흰 어깨라인
+    "삼미":["#88B7E1","#B21528","#B21528"],   // 슈퍼스타즈 82-84 · 공식
+    "쌍방울":["#FFC81E","#000000","#000000"],   // 레이더스 91-99 · 공식
+    "해태":["#000000","#FFD200","#EA0029"],   // 타이거즈 82-00 · 검정+노랑+빨강
+    "빙그레":["#F5821F","#FFFFFF","#FFFFFF"],   // 이글스 86-93 · 주황 확인
+    "OB":["#22307E","#FFFFFF","#EB1D25"],   // 베어스 82-98 · 남색+흰색+빨강
   };
   const colorOf = nick => TEAM_COLORS[nick] || ["#666666","#FFFFFF","#666666"];
   // 슬롯: 야수는 그림 좌표, 투수는 그림 아래 명단(pill)
   const MODES = {
-    quick: { name:"빠른 모드", skipY:1, skipT:1, slots:[
-      {label:"내야", role:"H", pos:IN, x:180, y:122},
-      {label:"외야", role:"H", pos:OF, x:180, y:46},
-      {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
-      {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]},
-    standard: { name:"정규 모드", skipY:5, skipT:5, slots:[
+    standard: { name:"정규 모드", skipY:3, skipT:3, slots:[
       {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
       {label:"1루", role:"H", pos:new Set(["1B"]), x:258, y:192},
       {label:"2루", role:"H", pos:new Set(["2B"]), x:230, y:130},
@@ -320,19 +340,23 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   };
   MODES.hard={ name:"하드 모드", skipY:MODES.standard.skipY, skipT:MODES.standard.skipT, hideStats:true, slots:MODES.standard.slots };
   MODES.unlimited={ name:"무제한 모드", skipY:Infinity, skipT:Infinity, noForeignLimit:true, slots:MODES.standard.slots };
-  // 스페셜 모드: 회차마다 교체. nicks = 룰렛에 나올 구단 애칭, years = 연도 제한(null이면 전체)
-  const SPECIAL={ title:"엘롯기", desc:"트윈스 · 자이언츠 · 타이거즈만", nicks:["트윈스","자이언츠","타이거즈"], years:null };
-  MODES.special={ name:"스페셜 모드 · "+SPECIAL.title, skipY:5, skipT:5, nicks:new Set(SPECIAL.nicks), yearFilter:SPECIAL.years, slots:MODES.standard.slots };
+  const MODERN=[2001,2025];                 // 정규 계열이 다루는 연도
+  MODES.standard.span=MODERN; MODES.hard.span=MODERN; MODES.unlimited.span=MODERN;
+  // 레전드 모드: 1982년 원년부터 전 구간
+  MODES.legend={ name:"레전드 모드", skipY:3, skipT:3, span:[1982,2025], slots:MODES.standard.slots };
+  // 스페셜 모드: 회차마다 교체. teams = 룰렛에 나올 팀(앞이름), span = 연도 범위(null이면 전체)
+  const SPECIAL={ title:"엘롯기", desc:"LG · 롯데 · KIA만", teams:["LG","롯데","KIA"], span:MODERN };
+  MODES.special={ name:"스페셜 모드 · "+SPECIAL.title, skipY:5, skipT:5, teams:new Set(SPECIAL.teams), span:SPECIAL.span, slots:MODES.standard.slots };
   const yearsAll = Object.keys(D.teams_by_year).map(Number).sort();
-  const modeNicks = () => MODES[S.mode] && MODES[S.mode].nicks;
-  const yearsOf = () => { const nk=modeNicks(), yf=MODES[S.mode]&&MODES[S.mode].yearFilter;
-    let ys=yearsAll; if (yf) ys=ys.filter(y=>yf.includes(y));
-    if (nk) ys=ys.filter(y=>Object.keys(D.teams_by_year[y]).some(n=>nk.has(n))); return ys; };
-  const nicksOf = y => { const nk=modeNicks(); const ns=Object.keys(D.teams_by_year[y]); return nk?ns.filter(n=>nk.has(n)):ns; };
+  const modeTeams = () => MODES[S.mode] && MODES[S.mode].teams;
+  const yearsOf = () => { const tk=modeTeams(), sp=(MODES[S.mode]&&MODES[S.mode].span)||[1982,2025];
+    let ys=yearsAll.filter(y=>y>=sp[0]&&y<=sp[1]);
+    if (tk) ys=ys.filter(y=>Object.keys(D.teams_by_year[y]).some(n=>tk.has(n))); return ys; };
+  const teamsOf = y => { const tk=modeTeams(); const ns=Object.keys(D.teams_by_year[y]); return tk?ns.filter(n=>tk.has(n)):ns; };
   const years = yearsAll;
   const byTY = new Map();
-  for (const p of D.players){ const k=p.year+"|"+p.nick; if(!byTY.has(k)) byTY.set(k,[]); byTY.get(k).push(p); }
-  const allNicks=[...new Set(D.players.map(p=>p.nick))];
+  for (const p of D.players){ const k=p.year+"|"+p.team; if(!byTY.has(k)) byTY.set(k,[]); byTY.get(k).push(p); }
+  const allTeams=[...new Set(D.players.map(p=>p.team))];
   const rnd = a => a[Math.floor(Math.random()*a.length)];
   const $ = id => document.getElementById(id);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -446,7 +470,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const h=30, w=p?Math.max(68,Math.round(34+12.5*shortName(nm(p)).length)):68; const [mx,my]=FM(s.x,s.y); s={...s,x:mx,y:my};
     const ring=el("rect",{class:"ring",x:s.x-w/2,y:s.y-h/2,width:w,height:h,rx:h/2},grp);
     if (p){
-      const [bg,fg,bd]=colorOf(p.nick); ring.style.fill=bg; if(!tg){ ring.style.stroke=bd; ring.style.strokeWidth="2.5"; }
+      const [bg,fg,bd]=colorOf(p.team); ring.style.fill=bg; if(!tg){ ring.style.stroke=bd; ring.style.strokeWidth="2.5"; }
       const t=el("text",{class:"nm",x:s.x,y:s.y+4},grp); t.style.fill=fg;
       const ys=el("tspan",{class:"yr"},t); ys.textContent=yy(p)+" "; const ns=el("tspan",{},t); ns.textContent=shortName(nm(p));
     } else {
@@ -468,7 +492,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
       for (const i of idxs){
         const s=S.slots[i], p=S.picks[i]; const b=document.createElement("button"); b.type="button";
         b.className="pill"+(p?" done":"")+(tg.has(i)?" target":"")+(S.moveFrom===i?" from":"");
-        if (p){ const [bg,fg,bd]=colorOf(p.nick); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; b.style.borderColor=bd; } b.innerHTML=`<span class="yr">${yy(p)}</span>${nm(p)}`; b.title=s.label; }
+        if (p){ const [bg,fg,bd]=colorOf(p.team); if(!tg.has(i)){ b.style.background=bg; b.style.color=fg; b.style.borderColor=bd; } b.innerHTML=`<span class="yr">${yy(p)}</span>${nm(p)}`; b.title=s.label; }
         else b.textContent=s.label;
         if (p||tg.has(i)) b.onclick=()=>onSlotTap(i);
         row.appendChild(b);
@@ -511,7 +535,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     for (let t=0;t<120;t++){
       let y,nick;
       if (lock.nick){ const ys=yearsOf().filter(v=>D.teams_by_year[v][lock.nick] && v!==exclude.y); if(!ys.length) return null; y=rnd(ys); nick=lock.nick; }
-      else { y=lock.y||rnd(yearsOf()); const ns=nicksOf(y).filter(n=>n!==exclude.nick); if(!ns.length) return null; nick=rnd(ns); }
+      else { y=lock.y||rnd(yearsOf()); const ns=teamsOf(y).filter(n=>n!==exclude.nick); if(!ns.length) return null; nick=rnd(ns); }
       const all=(byTY.get(y+"|"+nick)||[]).filter(p=>!S.used.has(person(p)));
       if (all.some(p=>open.some(sl=>fits(p,sl)))) return {y,nick,cands:all};
     }
@@ -526,7 +550,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const dur=(reduced||window.__instant)?0:1100; const t0=performance.now();
     ry.classList.add("spinning"); rt.classList.add("spinning");
     function tick(now){
-      if (now-t0<dur){ if(!lock.y) ry.querySelector("span").textContent=rnd(yearsOf()); if(!lock.nick) rt.querySelector("span").textContent=rnd(modeNicks()?[...modeNicks()]:allNicks); requestAnimationFrame(tick); }
+      if (now-t0<dur){ if(!lock.y) ry.querySelector("span").textContent=rnd(yearsOf()); if(!lock.nick) rt.querySelector("span").textContent=rnd(modeTeams()?[...modeTeams()]:allTeams); requestAnimationFrame(tick); }
       else land();
     }
     function land(){
@@ -578,7 +602,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
   }
   function renderCands(){
     const H=S.cands.filter(p=>p.role==="H"), P=S.cands.filter(p=>p.role!=="H");
-    $("fromLabel").innerHTML=`${S.spin.y} ${S.spin.nick}<span>${D.teams_by_year[S.spin.y][S.spin.nick]}</span>`;
+    $("fromLabel").innerHTML=`${S.spin.y} ${S.spin.nick}<span>${D.teams_by_year[S.spin.y][S.spin.nick]||""}</span>`;
     $("secH").style.display=H.length?"":"none"; $("secP").style.display=P.length?"":"none";
     if (H.length) renderTable(H,HCOLS,S.sortH,k=>S.sortH=k,$("tableH"),$("sortH"));
     if (P.length) renderTable(P,PCOLS,S.sortP,k=>S.sortP=k,$("tableP"),$("sortP"));
@@ -604,6 +628,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const H=S.picks.filter(p=>p.role==="H"), SP=S.picks.filter(p=>p.role==="SP"), RP=S.picks.filter(p=>p.role==="RP");
     const r=scoreLineup(H,SP,RP,S.mode); S.result=r;
     S.pending=null; S.moveFrom=null; renderSlots();
+    updateShareBtn();
     const rf=$("resultField"); rf.innerHTML=""; rf.appendChild($("field").cloneNode(true)); rf.appendChild($("pitch").cloneNode(true));  // 완성 라인업 그림 (정적)
     show("result");
     const big=$("recBig"); big.textContent=`${r.wins}-${r.losses}`; big.classList.toggle("perfect",r.wins>=100);
@@ -614,11 +639,15 @@ footer{font-size:12px;color:var(--ink-3);text-align:center}
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
-      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.nick)[0]};box-shadow:inset 0 0 0 2px ${colorOf(p.nick)[2]}"></div><div class="who"><b>${nm(p)}</b><span>${p.year} ${p.nick}</span></div><div class="st">${st}</div></div>`);
+      lu.insertAdjacentHTML("beforeend",`<div class="row"><div class="sl">${S.slots[i].label}</div><div class="dot" style="background:${colorOf(p.team)[0]};box-shadow:inset 0 0 0 2px ${colorOf(p.team)[2]}"></div><div class="who"><b>${nm(p)}</b><span>${p.year} ${p.full}</span></div><div class="st">${st}</div></div>`);
     });
   }
+  function updateShareBtn(){   // 공유는 정규 모드에서만 (나머지는 버튼 숨김)
+    const on=S.mode==="standard"; $("share").hidden=!on;
+    $("resultActions").style.gridTemplateColumns = on ? "1fr 1fr" : "1fr";
+  }
   function shareText(){
-    const r=S.result; const lines=S.picks.map((p,i)=>`${S.slots[i].label} ${nm(p)} (${p.year} ${p.nick})`);
+    const r=S.result; const lines=S.picks.map((p,i)=>`${S.slots[i].label} ${nm(p)} (${p.year} ${p.full})`);
     return `백승구단 ${MODES[S.mode].name}: ${r.wins}승 ${r.losses}패 ${r.grade} ${r.label}\n`+lines.join("\n");
   }
   function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
