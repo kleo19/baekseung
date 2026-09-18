@@ -35,16 +35,16 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;overflow-x:hidden;max-width:100%}
-body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .mono{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 .display{font-family:"Black Han Sans","IBM Plex Sans KR",sans-serif;font-weight:400;letter-spacing:-.01em}
 .app{max-width:520px;margin:0 auto;padding:16px 12px 48px;display:flex;flex-direction:column;gap:14px}
 .app>*,.card,.sec{min-width:0}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 0}
-header #quit{padding:4px 10px;font-size:12px;border-radius:999px}
+header #quit{padding:5px 12px;font-size:13px;border-radius:999px}
 header .logo{font-size:40px;line-height:1;color:var(--ink)}
 header .logo em{font-style:normal;color:var(--clay)}
-header .tag{font-size:12px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+header .tag{font-size:13px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
 button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px}
 button:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 button.primary{background:var(--clay);color:var(--clay-ink);border-color:var(--clay);font-weight:700}
@@ -62,16 +62,19 @@ button.ghost{background:transparent}
 .mode:hover::before{width:10px}
 .mode .name{font-size:21px;line-height:1.15;color:var(--ink)}
 .mode .name b{font-weight:400;color:var(--m)}
-.mode .desc{font-size:12.5px;color:var(--ink-2);line-height:1.45}
-.m-std{--m:#B85E27} .m-hard{--m:#2B2B2B} .m-sp{--m:#C9A227} .m-lgd{--m:#2E7A4B} .m-unl{--m:#4A7BB7}
+.mode .desc{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.m-qk{--m:#7E8A83} .m-std{--m:#B85E27} .m-hard{--m:#2B2B2B} .m-sp{--m:#C9A227} .m-lgd{--m:#2E7A4B} .m-unl{--m:#4A7BB7}
 @media (prefers-reduced-motion: reduce){.mode,.mode::before{transition:none}.mode:hover{transform:none}}
-.rules{font-size:13px;color:var(--ink-2);margin-top:14px}
+.rules{font-size:14px;color:var(--ink-2);margin-top:14px}
 .rules summary{cursor:pointer;color:var(--ink-3)}
 .rules ul{margin:4px 0 8px;padding-left:16px;display:grid;gap:2px}
 .rulebook{margin-top:8px}
-.rulebook h4{margin:8px 0 0;font-size:12px;letter-spacing:.06em;color:var(--ink-3);font-weight:700}
+.rulebook h4{margin:10px 0 2px;font-size:13px;letter-spacing:.06em;color:var(--ink-3);font-weight:700}
 
 /* field */
+.tip{display:grid;gap:7px;font-size:14px;color:var(--ink-2);padding:12px 14px;background:var(--grass-soft);border-color:var(--grass)}
+.tip>div{display:flex;align-items:center;gap:8px}
+.tip b{flex:0 0 auto;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:var(--grass);color:#fff;font-size:12px}
 .field-card{padding:10px 10px 8px;display:grid;gap:6px}
 .field{width:100%;height:auto;display:block}
 .mk{cursor:default}
@@ -83,23 +86,23 @@ button.ghost{background:transparent}
 .mk.done.target .ring{stroke:var(--clay);stroke-width:3}
 .mk.from .ring{stroke:var(--clay);stroke-width:3;stroke-dasharray:4 3}
 .mk text{font-family:"IBM Plex Sans KR",sans-serif;text-anchor:middle;pointer-events:none}
-.mk .lbl{font-size:10px;fill:var(--ink-3)}
+.mk .lbl{font-size:11px;fill:var(--ink-3)}
 .mk.target .lbl{fill:var(--clay);font-weight:700}
-.mk .nm{font-size:12px;font-weight:700}
+.mk .nm{font-size:13px;font-weight:700}
 .mk .nm tspan.yr{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-weight:500;opacity:.75;font-variant-numeric:tabular-nums}
 .mk .sub{font-size:9px;opacity:.8}
 .pitch{display:grid;gap:6px;padding:2px 2px 0}
 .pitch-row{display:flex;gap:4px;align-items:center;flex-wrap:nowrap}
-.pitch-row .rl{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--ink-3);width:26px}
-.pill{flex:1 1 auto;min-width:0;font-size:11px;padding:6px 3px;border-radius:999px;border:2px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.pitch-row .rl{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--ink-3);width:26px}
+.pill{flex:1 1 auto;min-width:0;font-size:12px;padding:6px 3px;border-radius:999px;border:2px dashed var(--line);color:var(--ink-3);background:var(--surface);cursor:default;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .pill.done{border-style:solid;cursor:pointer;font-weight:700}
 .pill.done .yr{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-weight:500;opacity:.75;margin-right:2px;font-size:.85em;font-variant-numeric:tabular-nums}
-.pill.s1{font-size:10px;padding-left:2px;padding-right:2px}.pill.s2{font-size:9px}
+.pill.s1{font-size:11px;padding-left:2px;padding-right:2px}.pill.s2{font-size:10px}
 .pill.target{border:2px solid var(--clay);color:var(--clay);background:var(--clay-soft);cursor:pointer;font-weight:700}
 .pill.from{box-shadow:0 0 0 2px var(--clay)}
-.status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:2px 4px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;padding:2px 4px}
 .status b{color:var(--clay)}
-.status button{padding:3px 10px;font-size:12px;border-radius:8px}
+.status button{padding:4px 11px;font-size:13px;border-radius:8px}
 
 /* reels */
 .reel-card{display:grid;gap:10px}
@@ -108,53 +111,54 @@ button.ghost{background:transparent}
 .reel{background:var(--surface-2);border-radius:12px;height:72px;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;position:relative;color:var(--ink)}
 .reel.spinning{color:var(--ink-3)}
 .reel.landed{box-shadow:inset 0 0 0 2px var(--clay)}
-.reel small{position:absolute;top:6px;left:10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-family:"IBM Plex Sans KR",sans-serif}
+.reel small{position:absolute;top:6px;left:10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-family:"IBM Plex Sans KR",sans-serif}
 .reel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .reel-actions .primary{grid-column:1/-1;padding:14px;font-size:16px}
 .reel-actions button b{font-weight:500;color:inherit;opacity:.7}
 
 /* candidates */
 .from{font-weight:700}
-.from span{color:var(--ink-3);font-weight:400;font-size:13px;margin-left:6px}
+.from span{color:var(--ink-3);font-weight:400;font-size:14px;margin-left:6px}
 .sec{margin-top:12px}
 .sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.sec-title{font-weight:700;font-size:13px;color:var(--ink-2)}
+.sec-title{font-weight:700;font-size:14px;color:var(--ink-2)}
 .sort{display:flex;gap:4px;flex-wrap:wrap}
-.sort button{padding:4px 8px;font-size:12px;border-radius:8px}
+.sort button{padding:5px 9px;font-size:13px;border-radius:8px}
 .sort button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px}
 .tbl-wrap{margin-top:4px;width:100%;overflow:hidden}
-th,td{padding:9px 3px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:clip;border-bottom:1px solid var(--line)}
-th{font-size:11px;letter-spacing:.02em;color:var(--ink-3);font-weight:500}
-th:first-child,td:first-child{text-align:left;padding-left:0;width:28%}
-td.who.t1 .pos{font-size:8.5px;margin-left:2px}
-td.who.t2 .pos{font-size:8px;margin-left:2px}
-td.who.t3 .pos{font-size:7.5px;margin-left:1px}
-td.who.t4{font-size:13px}td.who.t4 .pos{font-size:7px;margin-left:1px}
-td.who.t5{font-size:12px}td.who.t5 .pos{font-size:6.5px}
-td.who.t6{font-size:11px}td.who.t6 .pos{font-size:6px;letter-spacing:-.02em}
-td.who.t3 .pos .fr,td.who.t4 .pos .fr,td.who.t5 .pos .fr,td.who.t6 .pos .fr{font-size:6.5px;padding:0 2px}
+th,td{padding:9px 2px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:clip;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.02em;color:var(--ink-3);font-weight:500}
+th:first-child,td:first-child{text-align:left;padding-left:0;width:26%}
+/* 후보표 선수 칸: 넘칠 때 단계적으로 축소. 하한을 올려 폰에서 너무 작아지지 않게 한다. */
+td.who.t1 .pos{font-size:10px;margin-left:2px}
+td.who.t2 .pos{font-size:9.5px;margin-left:2px}
+td.who.t3 .pos{font-size:9px;margin-left:1px}
+td.who.t4{font-size:14px}td.who.t4 .pos{font-size:9px;margin-left:1px}
+td.who.t5{font-size:13.5px}td.who.t5 .pos{font-size:8.5px}
+td.who.t6{font-size:13px}td.who.t6 .pos{font-size:8.5px;letter-spacing:-.02em}
+td.who.t3 .pos .fr,td.who.t4 .pos .fr,td.who.t5 .pos .fr,td.who.t6 .pos .fr{font-size:8px;padding:0 2px}
 td.num{font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 tr.pick{cursor:pointer}
 tr.pick:hover td{background:var(--surface-2)}
 tr.pick.sel td{background:var(--clay-soft)}
 td .name{font-weight:700;color:var(--ink)}
-td .pos{font-size:10px;color:var(--ink-3);margin-left:3px}
+td .pos{font-size:11px;color:var(--ink-3);margin-left:3px}
 td .pos i{font-style:normal;color:var(--clay);font-weight:700}
-td .pos .fr{display:inline-block;font-size:9px;padding:0 3px;border-radius:4px;background:var(--navy-soft,#D9E3ED);color:var(--ink-2);margin-left:2px}
-.fcount{font-size:12px;color:var(--ink-3);text-align:right}
+td .pos .fr{display:inline-block;font-size:10px;padding:0 3px;border-radius:4px;background:var(--navy-soft,#D9E3ED);color:var(--ink-2);margin-left:2px}
+.fcount{font-size:13px;color:var(--ink-3);text-align:right}
 
 tr.dim td{color:var(--ink-3)}
 tr.dim td .name{color:var(--ink-3);font-weight:500}
 
 /* result */
 .record{display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:end}
-.record .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.record .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .record .big{font-size:56px;line-height:1;font-weight:700;color:var(--ink)}
 .record .big.perfect{color:var(--clay)}
 .gradebox{display:grid;justify-items:center;gap:4px;padding:10px 16px 8px;border-radius:14px;min-width:96px;color:#fff;background:var(--g-bg);box-shadow:0 6px 18px var(--g-glow)}
 .record .grade{font-size:44px;line-height:1;text-align:center}
-.record .glabel{font-size:11px;letter-spacing:.12em;text-align:center;opacity:.9}
+.record .glabel{font-size:12px;letter-spacing:.12em;text-align:center;opacity:.9}
 .g-S{--g-bg:linear-gradient(135deg,#F2C14E,#B8860B);--g-glow:rgba(242,193,78,.55)}
 .g-Ap{--g-bg:linear-gradient(135deg,#3FA36B,#1F6B44);--g-glow:rgba(63,163,107,.45)}
 .g-A{--g-bg:linear-gradient(135deg,#4A7BB7,#2B4A6B);--g-glow:rgba(74,123,183,.4)}
@@ -167,18 +171,19 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .score-line{display:grid;gap:6px;margin-top:14px}
 .score-line .bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
 .score-line .fill{height:100%;background:linear-gradient(90deg,var(--grass),var(--clay));border-radius:999px;transition:width .8s ease}
-.score-line .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2)}
+.score-line .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
 .lineup .row{display:grid;grid-template-columns:44px 12px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
 .lineup .row:last-child{border-bottom:0}
-.lineup .sl{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.04em}
+.lineup .sl{font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.04em}
 .lineup .dot{width:12px;height:12px;border-radius:50%}
 .lineup .who b{display:block}
-.lineup .who span{font-size:12px;color:var(--ink-3)}
-.lineup .st{font-size:12px;color:var(--ink-2);text-align:right;font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
+.lineup .who span{font-size:13px;color:var(--ink-3)}
+.lineup .st{font-size:13px;color:var(--ink-2);text-align:right;font-family:"IBM Plex Sans","IBM Plex Sans KR",sans-serif;font-variant-numeric:tabular-nums}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.show{opacity:1}
-footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
+footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
+@media (min-width:600px){body{font-size:17px}.app{max-width:600px;padding:20px 16px 48px}table{font-size:16px}}
 @media (prefers-reduced-motion: reduce){.score-line .fill{transition:none}}
 </style>
 </head>
@@ -193,6 +198,10 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
   <!-- HOME -->
   <section id="home" class="card">
     <div class="modes">
+      <button class="mode m-qk" data-mode="quick">
+        <span class="name display">연습 모드</span>
+        <span class="desc">처음이라면 여기부터! 다섯 자리만 채우면 끝</span>
+      </button>
       <button class="mode m-std" data-mode="standard">
         <span class="name display">정규 모드</span>
         <span class="desc">목표는 정규시즌 100승! 2001~2025</span>
@@ -225,6 +234,7 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
         <ul><li>타자는 타율, 장타율, 홈런, 도루, 실책</li><li>투수는 평균자책점과 아홉 이닝당 삼진, 볼넷, 피홈런, 피안타</li><li>실제 KBO 팀 성적을 기준으로 환산해 144경기 예상 승수가 나옴</li></ul>
         <h4>모드</h4>
         <ul>
+          <li><b>연습</b> 처음 해보는 사람을 위한 짧은 모드. 포수, 내야, 외야, 선발, 불펜 다섯 자리만 채움</li>
           <li><b>정규</b> 2001년 이후 선수로 겨루는 기본 모드. 다시뽑기는 연도와 구단 각각 세 번씩</li>
           <li><b>하드</b> 규칙은 정규와 같지만 선수 기록이 가려짐. 이름만 보고 골라야 하고, 기록은 결과 화면에서 공개</li>
           <li><b>스페셜</b> 회차마다 주제가 바뀜. 이번 회차는 엘롯기. LG, 롯데, KIA 세 팀만 나옴</li>
@@ -237,6 +247,11 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
 
   <!-- DRAFT -->
   <section id="draft" class="hidden" style="display:grid;gap:12px">
+    <div class="card tip hidden" id="tip">
+      <div><b>1</b>룰렛을 돌려 연도와 구단을 뽑음</div>
+      <div><b>2</b>그 팀 선수 중 한 명을 고름</div>
+      <div><b>3</b>야구장에서 자리를 눌러 배치</div>
+    </div>
     <div class="card field-card">
       <svg class="field" id="field" viewBox="0 0 360 316" role="img" aria-label="라인업"></svg>
       <div class="pitch" id="pitch"></div>
@@ -368,6 +383,12 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
   const MODERN=[2001,2025];                 // 정규 계열이 다루는 연도
   MODES.standard.span=MODERN; MODES.hard.span=MODERN; MODES.unlimited.span=MODERN;
   // 레전드 모드: 1982년 원년부터 전 구간
+  // 연습 모드: 첫 판용. 다섯 자리만 채우면 끝. 점수 곡선은 기존 quick 곡선을 그대로 쓴다.
+  MODES.quick={ name:"연습 모드", skipY:1, skipT:1, span:MODERN, tutorial:true, slots:[
+    {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
+    {label:"내야", role:"H", pos:IN_, x:130, y:130},
+    {label:"외야", role:"H", pos:OF_, x:180, y:66},
+    {label:"선발", role:"SP"}, {label:"불펜", role:"RP"} ]};
   MODES.legend={ name:"레전드 모드", skipY:3, skipT:3, span:[1982,2025], slots:MODES.standard.slots };
   // 스페셜 모드: 회차마다 교체. teams = 룰렛에 나올 팀(앞이름), span = 연도 범위(null이면 전체)
   const SPECIAL={ title:"엘롯기", desc:"LG · 롯데 · KIA만 나옴", teams:["LG","롯데","KIA"], span:MODERN };
@@ -406,9 +427,11 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
 
   // ---------- 상태 ----------
   let S=null;
+  // 정렬 기준은 판을 시작할 때 타율·ERA. 판 도중에 바꾸면 그 판이 끝날 때까지 유지된다.
   function start(mode){
     S={mode, slots:MODES[mode].slots, picks:MODES[mode].slots.map(()=>null), used:new Set(), skipY:MODES[mode].skipY, skipT:MODES[mode].skipT,
-       spin:null, cands:[], sortH:"SLG", sortP:"ERA", pending:null, moveFrom:null};
+       spin:null, cands:[], sortH:"AVG", sortP:"ERA", pending:null, moveFrom:null};
+    $("tip").classList.toggle("hidden", !MODES[mode].tutorial);
     show("draft"); drawField(); renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
   function show(id){ for (const s of ["home","draft","result"]) $(s).classList.toggle("hidden", s!==id); $("quit").hidden=id==="home"; $("hdrTag").hidden=id!=="home"; window.scrollTo({top:0}); }
@@ -590,7 +613,7 @@ footer{font-size:11px;color:var(--ink-3);text-align:center;opacity:.8}
 
   // ---------- 후보 표 ----------
   const HCOLS=[["AVG","타율",p=>fmt3(p.AVG),p=>-p.AVG],["SLG","장타",p=>fmt3(p.SLG),p=>-p.SLG],["HR","홈런",p=>p.HR,p=>-p.HR],["SB","도루",p=>p.SB,p=>-p.SB],["E","실책",p=>p.E,p=>p.E],["G","경기",p=>p.G,p=>-p.G]];
-  const PCOLS=[["ERA","ERA",p=>fmt2(p.ERA),p=>p.ERA],["IP","이닝",p=>Math.round(p.IP),p=>-p.IP],["k9","K9",p=>fmt1(p.k9),p=>-p.k9],["bb9","BB9",p=>fmt1(p.bb9),p=>p.bb9],["hr9","HR9",p=>fmt1(p.hr9),p=>p.hr9],["h9","H9",p=>fmt1(p.h9),p=>p.h9]];
+  const PCOLS=[["ERA","ERA",p=>fmt2(p.ERA),p=>p.ERA],["k9","K9",p=>fmt1(p.k9),p=>-p.k9],["bb9","BB9",p=>fmt1(p.bb9),p=>p.bb9],["hr9","HR9",p=>fmt1(p.hr9),p=>p.hr9],["h9","H9",p=>fmt1(p.h9),p=>p.h9],["IP","이닝",p=>Math.round(p.IP),p=>-p.IP]];
   function posLabel(p,openPos){
     if (p.role!=="H") return (p.role==="SP"?"선발":"불펜")+(p.foreign?' <span class="fr">외</span>':"");
     const list = p.dh_only ? ["DH"] : p.eligible.filter(x=>x!=="DH");
