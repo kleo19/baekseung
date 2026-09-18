@@ -55,6 +55,9 @@ button.ghost{background:transparent}
 
 /* home */
 .intro{margin:0 0 14px;color:var(--ink-2)}
+.intro{list-style:none;counter-reset:i;margin:0 0 14px;padding:0;display:grid;gap:6px;font-size:13.5px;color:var(--ink-2)}
+.intro li{counter-increment:i;display:flex;align-items:center;gap:8px;line-height:1.35}
+.intro li::before{content:counter(i);flex:0 0 auto;width:19px;height:19px;line-height:19px;text-align:center;border-radius:50%;background:var(--surface-2);color:var(--ink-3);font-size:11px;font-weight:700}
 .modes{display:grid;gap:10px}
 .mode{position:relative;display:grid;gap:3px;text-align:left;justify-items:start;padding:14px 16px 14px 20px;border-radius:12px;overflow:hidden;transition:transform .12s ease,box-shadow .12s ease}
 .mode::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--m);transition:width .12s ease}
@@ -197,6 +200,11 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
 
   <!-- HOME -->
   <section id="home" class="card">
+    <ol class="intro">
+      <li>룰렛이 연도와 구단을 뽑음</li>
+      <li>그 팀 선수 중 한 명만 데려와 자리에 배치</li>
+      <li>연도나 구단이 마음에 안 들면 다시 뽑기 가능</li>
+    </ol>
     <div class="modes">
       <button class="mode m-qk" data-mode="quick">
         <span class="name display">연습 모드</span>
