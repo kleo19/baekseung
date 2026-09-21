@@ -423,7 +423,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   const fmt3 = v => v==null?"-":(Math.round(v*1000)/1000).toFixed(3).replace(/^0/,"");
   const fmt2 = v => v==null?"-":(Math.round(v*100)/100).toFixed(2);
   const fmt1 = v => v==null?"-":(Math.round(v*10)/10).toFixed(1);
-  const person = p => (MODES[S.mode] && MODES[S.mode].dupPlayer) ? p.id : p.id.split("_")[0];   // 무제한은 같은 선수의 다른 시즌 허용
+  // id는 "선수번호_연도_H|P". 무제한은 같은 선수의 다른 시즌을 허용하되 같은 해 투타 겸업은 막는다.
+  const person = p => (MODES[S.mode] && MODES[S.mode].dupPlayer)
+    ? p.id.split("_").slice(0,2).join("_") : p.id.split("_")[0];
   const yy = p => String(p.year%100).padStart(2,"0");
   const nm = p => p.disp || p.name;
 
@@ -608,22 +610,26 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     const res=drawTY(lock,exclude); if(!res) return;
     S.spin={y:res.y,nick:res.nick}; S.cands=res.cands;
     $("spin").disabled=true; $("skipTeam").disabled=true; $("skipYear").disabled=true; hideCands();
-    const ry=$("reelYear"), rt=$("reelTeam"); ry.classList.remove("landed"); rt.classList.remove("landed");
+    const ry=$("reelYear"), rt=$("reelTeam");
+    // 다시뽑기로 한쪽이 고정된 경우, 고정된 칸은 돌리지 않고 값을 그대로 둔다.
+    const spinY=!lock.y, spinT=!lock.nick;
+    if (spinY) ry.classList.remove("landed");
+    if (spinT) rt.classList.remove("landed");
     // 연도가 먼저 멈추고, 잠시 뒤 구단이 멈춘다. 둘 다 멈추면 후보 목록으로 스크롤.
     const fast=(reduced||window.__instant);
-    const T_Y=fast?0:1000, T_T=fast?0:1450, HOLD=fast?0:420;
-    const t0=performance.now(); let doneY=false, doneT=false;
-    ry.classList.add("spinning"); rt.classList.add("spinning");
+    const both=spinY&&spinT;
+    const T_Y=fast?0:1000, T_T=fast?0:(both?1450:1000), HOLD=fast?0:420;
+    const t0=performance.now(); let doneY=!spinY, doneT=!spinT;
+    if (spinY) ry.classList.add("spinning");
+    if (spinT) rt.classList.add("spinning");
     function stop(el, val){
       el.classList.remove("spinning"); el.classList.add("landed");
       el.querySelector("span").textContent=val;
     }
     function tick(now){
       const e=now-t0;
-      if (!doneY && e>=T_Y){ doneY=true; stop(ry,res.y); }
-      else if (!doneY && !lock.y) ry.querySelector("span").textContent=rnd(yearsOf());
-      if (!doneT && e>=T_T){ doneT=true; stop(rt,res.nick); }
-      else if (!doneT && !lock.nick) rt.querySelector("span").textContent=rnd(modeTeams()?[...modeTeams()]:allTeams);
+      if (!doneY){ if (e>=T_Y){ doneY=true; stop(ry,res.y); } else ry.querySelector("span").textContent=rnd(yearsOf()); }
+      if (!doneT){ if (e>=T_T){ doneT=true; stop(rt,res.nick); } else rt.querySelector("span").textContent=rnd(modeTeams()?[...modeTeams()]:allTeams); }
       if (doneY && doneT) return finishSpin();
       requestAnimationFrame(tick);
     }
@@ -635,7 +641,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
         if (c && c.style.display!=="none") c.scrollIntoView({block:"start",behavior:"smooth"});
       }, HOLD);
     }
-    if (fast){ stop(ry,res.y); stop(rt,res.nick); finishSpin(); } else requestAnimationFrame(tick);
+    if (fast){ stop(ry,res.y); stop(rt,res.nick); finishSpin(); }
+    else if (doneY && doneT) finishSpin();
+    else requestAnimationFrame(tick);
   }
   function skipTeam(){ if(S.skipT<=0||!S.spin) return; S.skipT--; const cur=S.spin; spin({y:cur.y},{nick:cur.nick}); }
   function skipYear(){ if(S.skipY<=0||!S.spin) return; S.skipY--; const cur=S.spin; spin({nick:cur.nick},{y:cur.y}); }
