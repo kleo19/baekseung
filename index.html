@@ -111,9 +111,15 @@ button.ghost{background:transparent}
 .reel-card{display:grid;gap:10px}
 .reel-head{display:flex;justify-content:flex-end}
 .reels{display:grid;grid-template-columns:1fr 1.6fr;gap:10px}
-.reel{background:var(--surface-2);border-radius:12px;height:72px;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;position:relative;color:var(--ink)}
-.reel.spinning{color:var(--ink-3)}
-.reel.landed{box-shadow:inset 0 0 0 2px var(--clay)}
+.reel{background:var(--surface-2);border-radius:12px;height:76px;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;position:relative;color:var(--ink);transition:background .2s ease}
+.reel span{display:block;will-change:transform,opacity}
+.reel.spinning{color:var(--ink-3);background:var(--surface-2)}
+.reel.spinning span{animation:reelroll .09s linear infinite}
+@keyframes reelroll{0%{transform:translateY(-58%);opacity:0}18%{opacity:1}82%{opacity:1}100%{transform:translateY(58%);opacity:0}}
+.reel.landed{box-shadow:inset 0 0 0 2.5px var(--clay);background:var(--clay-soft)}
+.reel.landed span{animation:reelpop .34s cubic-bezier(.2,1.5,.4,1)}
+@keyframes reelpop{0%{transform:scale(.62) translateY(-10px);opacity:.2}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.reel.spinning span,.reel.landed span{animation:none}}
 .reel small{position:absolute;top:6px;left:10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-family:"IBM Plex Sans KR",sans-serif}
 .reel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .reel-actions .primary{grid-column:1/-1;padding:14px;font-size:16px}
@@ -256,15 +262,9 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   <!-- DRAFT -->
   <section id="draft" class="hidden" style="display:grid;gap:12px">
     <div class="card tip hidden" id="tip">
-      <div><b>1</b>룰렛을 돌려 연도와 구단을 뽑음</div>
-      <div><b>2</b>그 팀 선수 중 한 명을 고름</div>
-      <div><b>3</b>야구장에서 자리를 눌러 배치</div>
-    </div>
-    <div class="card field-card">
-      <svg class="field" id="field" viewBox="0 0 360 316" role="img" aria-label="라인업"></svg>
-      <div class="pitch" id="pitch"></div>
-      <div class="fcount" id="fcount"></div>
-      <div class="status hidden" id="status"><span id="statusText"></span><button class="ghost" id="statusCancel">취소</button></div>
+      <div><b>1</b>룰렛이 연도와 구단을 뽑음</div>
+      <div><b>2</b>그 팀 선수 중 한 명만 데려와 자리에 배치</div>
+      <div><b>3</b>연도나 구단이 마음에 안 들면 다시 뽑기 가능</div>
     </div>
     <div class="card reel-card">
       <div class="reels">
@@ -276,6 +276,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
         <button id="skipYear">연도 다시뽑기 <b id="skipLeft2"></b></button>
         <button id="skipTeam">구단 다시뽑기 <b id="skipLeft1"></b></button>
       </div>
+    </div>
+    <div class="card field-card">
+      <svg class="field" id="field" viewBox="0 0 360 316" role="img" aria-label="라인업"></svg>
+      <div class="pitch" id="pitch"></div>
+      <div class="fcount" id="fcount"></div>
+      <div class="status hidden" id="status"><span id="statusText"></span><button class="ghost" id="statusCancel">취소</button></div>
     </div>
     <div class="card" id="candCard" style="display:none">
       <div class="from" id="fromLabel"></div>
@@ -392,7 +398,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   MODES.standard.span=MODERN; MODES.hard.span=MODERN; MODES.unlimited.span=MODERN;
   // 레전드 모드: 1982년 원년부터 전 구간
   // 연습 모드: 첫 판용. 다섯 자리만 채우면 끝. 점수 곡선은 기존 quick 곡선을 그대로 쓴다.
-  MODES.quick={ name:"연습 모드", skipY:1, skipT:1, span:MODERN, tutorial:true, slots:[
+  MODES.quick={ name:"연습 모드", skipY:1, skipT:1, span:MODERN, slots:[
     {label:"포수", role:"H", pos:new Set(["C"]), x:180, y:282},
     {label:"내야", role:"H", pos:IN_, x:130, y:130},
     {label:"외야", role:"H", pos:OF_, x:180, y:66},
@@ -439,7 +445,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   function start(mode){
     S={mode, slots:MODES[mode].slots, picks:MODES[mode].slots.map(()=>null), used:new Set(), skipY:MODES[mode].skipY, skipT:MODES[mode].skipT,
        spin:null, cands:[], sortH:"AVG", sortP:"ERA", pending:null, moveFrom:null};
-    $("tip").classList.toggle("hidden", !MODES[mode].tutorial);
+    $("tip").classList.remove("hidden");   // 판을 시작하면 모든 모드에서 안내를 띄우고, 첫 배치 뒤 감춘다
     show("draft"); drawField(); renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
   function show(id){ for (const s of ["home","draft","result"]) $(s).classList.toggle("hidden", s!==id); $("quit").hidden=id==="home"; $("hdrTag").hidden=id!=="home"; window.scrollTo({top:0}); }
@@ -603,18 +609,33 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     S.spin={y:res.y,nick:res.nick}; S.cands=res.cands;
     $("spin").disabled=true; $("skipTeam").disabled=true; $("skipYear").disabled=true; hideCands();
     const ry=$("reelYear"), rt=$("reelTeam"); ry.classList.remove("landed"); rt.classList.remove("landed");
-    const dur=(reduced||window.__instant)?0:1100; const t0=performance.now();
+    // 연도가 먼저 멈추고, 잠시 뒤 구단이 멈춘다. 둘 다 멈추면 후보 목록으로 스크롤.
+    const fast=(reduced||window.__instant);
+    const T_Y=fast?0:1000, T_T=fast?0:1450, HOLD=fast?0:420;
+    const t0=performance.now(); let doneY=false, doneT=false;
     ry.classList.add("spinning"); rt.classList.add("spinning");
+    function stop(el, val){
+      el.classList.remove("spinning"); el.classList.add("landed");
+      el.querySelector("span").textContent=val;
+    }
     function tick(now){
-      if (now-t0<dur){ if(!lock.y) ry.querySelector("span").textContent=rnd(yearsOf()); if(!lock.nick) rt.querySelector("span").textContent=rnd(modeTeams()?[...modeTeams()]:allTeams); requestAnimationFrame(tick); }
-      else land();
+      const e=now-t0;
+      if (!doneY && e>=T_Y){ doneY=true; stop(ry,res.y); }
+      else if (!doneY && !lock.y) ry.querySelector("span").textContent=rnd(yearsOf());
+      if (!doneT && e>=T_T){ doneT=true; stop(rt,res.nick); }
+      else if (!doneT && !lock.nick) rt.querySelector("span").textContent=rnd(modeTeams()?[...modeTeams()]:allTeams);
+      if (doneY && doneT) return finishSpin();
+      requestAnimationFrame(tick);
     }
-    function land(){
-      ry.classList.remove("spinning"); rt.classList.remove("spinning"); ry.classList.add("landed"); rt.classList.add("landed");
-      ry.querySelector("span").textContent=res.y; rt.querySelector("span").textContent=res.nick;
+    function finishSpin(){
       renderCands(); updateSkip();
+      if (fast) return;
+      setTimeout(()=>{   // 연도·구단을 잠깐 보여준 뒤 후보 목록으로 내려간다
+        const c=$("candCard");
+        if (c && c.style.display!=="none") c.scrollIntoView({block:"start",behavior:"smooth"});
+      }, HOLD);
     }
-    if (dur===0) land(); else requestAnimationFrame(tick);
+    if (fast){ stop(ry,res.y); stop(rt,res.nick); finishSpin(); } else requestAnimationFrame(tick);
   }
   function skipTeam(){ if(S.skipT<=0||!S.spin) return; S.skipT--; const cur=S.spin; spin({y:cur.y},{nick:cur.nick}); }
   function skipYear(){ if(S.skipY<=0||!S.spin) return; S.skipY--; const cur=S.spin; spin({nick:cur.nick},{y:cur.y}); }
@@ -675,6 +696,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   }
   function place(p,i){
     S.picks[i]=p; S.used.add(person(p)); S.spin=null; S.cands=[];
+    $("tip").classList.add("hidden");
     if (openIdx().length===0) return finish();
     renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
