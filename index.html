@@ -181,6 +181,15 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .score-line .bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
 .score-line .fill{height:100%;background:linear-gradient(90deg,var(--grass),var(--clay));border-radius:999px;transition:width .8s ease}
 .score-line .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
+.best{font-size:13px;color:var(--ink-2);overflow:hidden}
+.best summary{cursor:pointer;color:var(--ink-3);font-size:13px}
+.best .hd{margin:10px 0 6px;font-weight:700;color:var(--ink)}
+.best .sub{color:var(--ink-3);font-size:12px;font-weight:400;margin-left:6px}
+.best .row{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
+.best .row:last-child{border-bottom:0}
+.best .sl{color:var(--ink-3);font-size:12px;font-weight:700}
+.best .yr{color:var(--ink-3);font-size:12px}
+.best .nm{font-weight:700;color:var(--ink)}
 .lineup .row{display:grid;grid-template-columns:44px 12px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
 .lineup .row:last-child{border-bottom:0}
 .lineup .sl{font-size:12px;font-weight:700;color:var(--ink-3);letter-spacing:.04em}
@@ -243,7 +252,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
         <h4>드래프트</h4>
         <ul><li>룰렛을 돌리면 연도와 구단이 하나씩 정해짐</li><li>그 해 그 팀에서 뛴 선수 중 한 명을 골라 자리에 배치</li><li>마음에 안 들면 연도만, 또는 구단만 다시 뽑을 수 있음</li><li>자리를 다 채우면 시즌 결과가 나옴</li></ul>
         <h4>라인업</h4>
-        <ul><li>타자 아홉 명, 선발 투수 다섯 명, 불펜 투수 세 명 (연습 모드는 다섯 자리)</li><li>선수를 고르면 들어갈 수 있는 자리가 표시됨</li><li>이미 채운 자리를 누르면 위치를 옮기거나 서로 맞바꿀 수 있음</li><li>같은 선수는 한 번만</li><li>외국인 선수는 한 팀에 세 명까지 (무제한 모드는 제한 없음)</li><li>다시뽑기 횟수는 모드마다 다름</li></ul>
+        <ul><li>타자 아홉 명, 선발 투수 다섯 명, 불펜 투수 세 명 (연습 모드는 다섯 자리)</li><li>선수를 고르면 들어갈 수 있는 자리가 표시됨</li><li>이미 채운 자리를 누르면 위치를 옮기거나 서로 맞바꿀 수 있음</li><li>같은 선수는 한 번만</li><li>외국인 선수는 한 팀에 세 명까지 (무제한 모드는 제한 없음)</li><li>다시뽑기는 연도와 구단 각각 세 번씩 (연습 모드는 한 번, 무제한 모드는 열 번)</li></ul>
         <h4>팀 평가</h4>
         <ul><li>타자는 타율, 장타율, 홈런, 도루, 실책</li><li>투수는 평균자책점과 아홉 이닝당 삼진, 볼넷, 피홈런, 피안타</li><li>실제 KBO 팀 성적을 기준으로 환산해 144경기 예상 승수가 나옴</li><li>선수는 2001-2025년, 레전드 모드만 1982년부터</li></ul>
         <h4>모드</h4>
@@ -316,6 +325,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
       </div>
     </div>
     <div class="card"><div class="lineup" id="lineup"></div></div>
+    <details class="card best"><summary>이 판에 나온 팀으로 만들 수 있던 최강 라인업</summary><div id="bestBox"></div></details>
     <div class="result-actions" id="resultActions">
       <button class="primary" id="again">다시</button>
       <button id="share">결과 복사</button>
@@ -441,12 +451,99 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     return {dev,score,wins,losses:144-wins,grade:g[1],label:g[2]};
   }
 
+  // ---------- 테스트용: 이 판에 나온 팀-연도로 만들 수 있는 최강 라인업 ----------
+  // 팀 편차는 그룹별 평균의 합이라, 그룹 안에서는 선수별 기여도의 단순 합을 최대화하면 된다.
+  function soloVal(p){
+    const feats = p.role==="H" ? PR.HIT : PR.PIT;
+    const share = p.role==="H" ? 1 : (p.role==="SP" ? PR.SP_SHARE : 1-PR.SP_SHARE);
+    let v=0; for (const k of feats) v += PR.COEF[k]*PR.K[k]*p.z[k]*share;
+    return v;
+  }
+  function bestPitchers(pool, role, n, maxF){
+    const c = pool.filter(p=>p.role===role).sort((a,b)=>soloVal(b)-soloVal(a));
+    const dom=c.filter(p=>!p.foreign), fo=c.filter(p=>p.foreign);
+    let best=null;
+    for (let f=0; f<=Math.min(maxF, fo.length, n); f++){
+      if (dom.length < n-f) continue;
+      const pick=[...fo.slice(0,f), ...dom.slice(0,n-f)];
+      const v=pick.reduce((t,p)=>t+soloVal(p),0);
+      if (!best || v>best.v) best={v, pick, f};
+    }
+    return best;
+  }
+  // 타자 9자리 배정: 슬롯 비트마스크 × 외국인 수 DP (정확해)
+  function bestHitters(pool, slots, maxF){
+    const cand = pool.filter(p=>p.role==="H");
+    const N=slots.length, FULL=(1<<N)-1, FC=Math.min(maxF,N)+1;
+    const size=(FULL+1)*FC, NEG=-1e9;
+    let dp=new Float64Array(size).fill(NEG); dp[0]=0;
+    const from=new Int32Array(cand.length*size).fill(-1);
+    for (let i=0;i<cand.length;i++){
+      const p=cand[i], isF=p.foreign?1:0, v=soloVal(p);
+      const nd=Float64Array.from(dp);
+      for (let m=0;m<=FULL;m++) for (let f=0;f<FC;f++){
+        const cur=dp[m*FC+f]; if (cur<=NEG/2) continue;
+        if (isF && f+1>=FC) continue;
+        for (let sIdx=0;sIdx<N;sIdx++){
+          const bit=1<<sIdx; if (m&bit) continue;
+          if (!fitsSlot(p, slots[sIdx])) continue;
+          const nf=f+isF, key=(m|bit)*FC+nf;
+          if (cur+v > nd[key]){ nd[key]=cur+v; from[i*size+key]=m*FC+f+sIdx*size*0 + 0; from[i*size+key]=(m*FC+f)*16+sIdx; }
+        }
+      }
+      dp=nd;
+    }
+    let bestKey=-1, bestV=NEG;
+    for (let f=0;f<FC;f++){ const k=FULL*FC+f; if (dp[k]>bestV){ bestV=dp[k]; bestKey=k; } }
+    if (bestKey<0) return null;
+    // 역추적
+    const out=new Array(N).fill(null); let key=bestKey;
+    for (let i=cand.length-1;i>=0 && key>0;i--){
+      const rec=from[i*size+key];
+      if (rec<0) continue;
+      const prev=Math.floor(rec/16), sIdx=rec%16;
+      out[sIdx]=cand[i]; key=prev;
+    }
+    return {v:bestV, picks:out, f:bestKey%FC};
+  }
+  function fitsSlot(p, sl){
+    if (p.role!==sl.role) return false;
+    if (sl.role!=="H" || !sl.pos) return true;
+    return p.eligible.some(x=>sl.pos.has(x));
+  }
+  function bestPossible(){
+    if (!S || !S.seen || !S.seen.length) return null;
+    const seen=new Map();
+    for (const t of S.seen) for (const p of (byTY.get(t.y+"|"+t.nick)||[])) if(!seen.has(p.id)) seen.set(p.id,p);
+    // 같은 인물은 한 번만 쓸 수 있으므로, 인물별로 기여도가 가장 높은 한 항목만 남긴다.
+    const byPerson=new Map();
+    for (const p of seen.values()){
+      const k=person(p), cur=byPerson.get(k);
+      if (!cur || soloVal(p)>soloVal(cur)) byPerson.set(k,p);
+    }
+    const pool=[...byPerson.values()];
+    const slots=S.slots, hs=slots.filter(x=>x.role==="H");
+    const maxF = MODES[S.mode].noForeignLimit ? 99 : MAX_FOREIGN;
+    const nSP=slots.filter(x=>x.role==="SP").length, nRP=slots.filter(x=>x.role==="RP").length;
+    let best=null;
+    for (let fh=0; fh<=Math.min(maxF,hs.length); fh++){
+      const H=bestHitters(pool, hs, fh); if(!H) continue;
+      const SPb=bestPitchers(pool,"SP",nSP, maxF-H.f); if(!SPb) continue;
+      const RPb=bestPitchers(pool,"RP",nRP, maxF-H.f-SPb.f); if(!RPb) continue;
+      const tot=H.v+SPb.v+RPb.v;
+      if (!best || tot>best.tot) best={tot, H, SP:SPb, RP:RPb};
+    }
+    if (!best) return null;
+    const r=scoreLineup(best.H.picks.filter(Boolean), best.SP.pick, best.RP.pick, S.mode);
+    return {r, hs, H:best.H.picks, SP:best.SP.pick, RP:best.RP.pick, teams:S.seen.length, pool:pool.length};
+  }
+
   // ---------- 상태 ----------
   let S=null;
   // 정렬 기준은 판을 시작할 때 타율·ERA. 판 도중에 바꾸면 그 판이 끝날 때까지 유지된다.
   function start(mode){
     S={mode, slots:MODES[mode].slots, picks:MODES[mode].slots.map(()=>null), used:new Set(), skipY:MODES[mode].skipY, skipT:MODES[mode].skipT,
-       spin:null, cands:[], sortH:"AVG", sortP:"ERA", pending:null, moveFrom:null};
+       spin:null, cands:[], sortH:"AVG", sortP:"ERA", pending:null, moveFrom:null, seen:[]};
     $("tip").classList.remove("hidden");   // 판을 시작하면 모든 모드에서 안내를 띄우고, 첫 배치 뒤 감춘다
     show("draft"); drawField(); renderSlots(); resetReels(); hideCands(); $("spin").disabled=false; updateSkip();
   }
@@ -609,6 +706,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     cancelState();
     const res=drawTY(lock,exclude); if(!res) return;
     S.spin={y:res.y,nick:res.nick}; S.cands=res.cands;
+    if (S.seen && !S.seen.some(t=>t.y===res.y&&t.nick===res.nick)) S.seen.push({y:res.y,nick:res.nick});   // 테스트용: 이 판에 나온 팀-연도
     $("spin").disabled=true; $("skipTeam").disabled=true; $("skipYear").disabled=true; hideCands();
     const ry=$("reelYear"), rt=$("reelTeam");
     // 다시뽑기로 한쪽이 고정된 경우, 고정된 칸은 돌리지 않고 값을 그대로 둔다.
@@ -722,6 +820,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     const gc="g-"+r.grade.replace("+","p"); const rec=document.querySelector("#result .record"); rec.className="record "+gc; $("gradeBox").className="gradebox "+gc;
     const pts=Math.max(0,Math.min(100,Math.round(50+10*r.score))); $("scoreNum").textContent=pts;
     requestAnimationFrame(()=>{ $("scoreFill").style.width=pts+"%"; });
+    renderBest();
     const lu=$("lineup"); lu.innerHTML="";
     S.picks.forEach((p,i)=>{
       const st = p.role==="H" ? `${fmt3(p.AVG)} / ${fmt3(p.SLG)} · ${p.HR}홈런 ${p.SB}도루` : `ERA ${fmt2(p.ERA)} · ${fmt1(p.IP)}이닝`;
@@ -731,6 +830,22 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   function updateShareBtn(){   // 공유는 정규 모드에서만 (나머지는 버튼 숨김)
     const on=S.mode==="standard"; $("share").hidden=!on;
     $("resultActions").style.gridTemplateColumns = on ? "1fr 1fr" : "1fr";
+  }
+  function renderBest(){
+    const box=$("bestBox"); if(!box) return;
+    box.innerHTML='<div class="sub">계산 중</div>';
+    setTimeout(()=>{
+      let b=null; try{ b=bestPossible(); }catch(e){ box.innerHTML='<div class="sub">계산 실패</div>'; return; }
+      if(!b){ box.innerHTML='<div class="sub">기록 없음</div>'; return; }
+      const cur=S.result;
+      let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">지금 결과 ${cur.wins}승 · 차이 ${b.r.wins-cur.wins>=0?"+":""}${b.r.wins-cur.wins}승</span></div>`;
+      h+=`<div class="sub">나온 팀 ${b.teams}개 · 후보 ${b.pool}명 중 최적 배치</div>`;
+      b.hs.forEach((sl,i)=>{ const p=b.H[i]; if(!p) return;
+        h+=`<div class="row"><div class="sl">${sl.label}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
+      b.SP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">선발${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
+      b.RP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">불펜${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
+      box.innerHTML=h;
+    },30);
   }
   function shareText(){
     const r=S.result; const lines=S.picks.map((p,i)=>`${S.slots[i].label} ${nm(p)} (${p.year} ${p.full})`);
