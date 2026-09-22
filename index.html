@@ -243,12 +243,12 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
         <h4>드래프트</h4>
         <ul><li>룰렛을 돌리면 연도와 구단이 하나씩 정해짐</li><li>그 해 그 팀에서 뛴 선수 중 한 명을 골라 자리에 배치</li><li>마음에 안 들면 연도만, 또는 구단만 다시 뽑을 수 있음</li><li>자리를 다 채우면 시즌 결과가 나옴</li></ul>
         <h4>라인업</h4>
-        <ul><li>타자 아홉 명, 선발 투수 다섯 명, 불펜 투수 세 명</li><li>선수를 고르면 들어갈 수 있는 자리가 표시됨</li><li>이미 채운 자리를 누르면 위치를 옮기거나 서로 맞바꿀 수 있음</li><li>같은 선수는 한 번만</li><li>외국인 선수는 한 팀에 세 명까지</li></ul>
+        <ul><li>타자 아홉 명, 선발 투수 다섯 명, 불펜 투수 세 명 (연습 모드는 다섯 자리)</li><li>선수를 고르면 들어갈 수 있는 자리가 표시됨</li><li>이미 채운 자리를 누르면 위치를 옮기거나 서로 맞바꿀 수 있음</li><li>같은 선수는 한 번만</li><li>외국인 선수는 한 팀에 세 명까지 (무제한 모드는 제한 없음)</li><li>다시뽑기 횟수는 모드마다 다름</li></ul>
         <h4>팀 평가</h4>
-        <ul><li>타자는 타율, 장타율, 홈런, 도루, 실책</li><li>투수는 평균자책점과 아홉 이닝당 삼진, 볼넷, 피홈런, 피안타</li><li>실제 KBO 팀 성적을 기준으로 환산해 144경기 예상 승수가 나옴</li></ul>
+        <ul><li>타자는 타율, 장타율, 홈런, 도루, 실책</li><li>투수는 평균자책점과 아홉 이닝당 삼진, 볼넷, 피홈런, 피안타</li><li>실제 KBO 팀 성적을 기준으로 환산해 144경기 예상 승수가 나옴</li><li>선수는 2001-2025년, 레전드 모드만 1982년부터</li></ul>
         <h4>모드</h4>
         <ul>
-          <li><b>연습</b> 처음 해보는 사람을 위한 짧은 모드. 포수, 내야, 외야, 선발, 불펜 다섯 자리만 채움</li>
+          <li><b>연습</b> 처음 해보는 사람을 위한 짧은 모드. 포수, 내야, 외야, 선발, 불펜 다섯 자리만 채우고 다시뽑기는 한 번씩</li>
           <li><b>정규</b> 2001년 이후 선수로 겨루는 기본 모드. 다시뽑기는 연도와 구단 각각 세 번씩</li>
           <li><b>하드</b> 규칙은 정규와 같지만 선수 기록이 가려짐. 이름만 보고 골라야 하고, 기록은 결과 화면에서 공개</li>
           <li><b>스페셜</b> 회차마다 주제가 바뀜. 이번 회차는 엘롯기. LG, 롯데, KIA 세 팀만 나옴</li>
@@ -406,7 +406,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
   MODES.legend={ name:"레전드 모드", skipY:3, skipT:3, span:[1982,2025], slots:MODES.standard.slots };
   // 스페셜 모드: 회차마다 교체. teams = 룰렛에 나올 팀(앞이름), span = 연도 범위(null이면 전체)
   const SPECIAL={ title:"엘롯기", desc:"LG · 롯데 · KIA만 나옴", teams:["LG","롯데","KIA"], span:MODERN };
-  MODES.special={ name:"스페셜 모드 · "+SPECIAL.title, skipY:5, skipT:5, teams:new Set(SPECIAL.teams), span:SPECIAL.span, slots:MODES.standard.slots };
+  MODES.special={ name:"스페셜 모드 · "+SPECIAL.title, skipY:3, skipT:3, teams:new Set(SPECIAL.teams), span:SPECIAL.span, slots:MODES.standard.slots };
   const yearsAll = Object.keys(D.teams_by_year).map(Number).sort();
   const modeTeams = () => MODES[S.mode] && MODES[S.mode].teams;
   const yearsOf = () => { const tk=modeTeams(), sp=(MODES[S.mode]&&MODES[S.mode].span)||[1982,2025];
