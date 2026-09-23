@@ -724,7 +724,6 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     cancelState();
     const res=drawTY(lock,exclude); if(!res) return;
     S.spin={y:res.y,nick:res.nick}; S.cands=res.cands;
-    if (S.seen) S.seen.push({y:res.y,nick:res.nick});   // 테스트용: 룰렛에 나온 팀-연도 (중복 포함, 1회 = 선수 1명 기회)
     $("spin").disabled=true; $("skipTeam").disabled=true; $("skipYear").disabled=true; hideCands();
     const ry=$("reelYear"), rt=$("reelTeam");
     // 다시뽑기로 한쪽이 고정된 경우, 고정된 칸은 돌리지 않고 값을 그대로 둔다.
@@ -819,6 +818,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     $("field").scrollIntoView({block:"start",behavior:reduced?"auto":"smooth"});
   }
   function place(p,i){
+    if (S.seen && S.spin) S.seen.push({y:S.spin.y, nick:S.spin.nick});   // 테스트용: 실제로 선수를 데려온 팀-연도 (다시뽑기로 지나간 것은 제외)
     S.picks[i]=p; S.used.add(person(p)); S.spin=null; S.cands=[];
     $("tip").classList.add("hidden");
     if (openIdx().length===0) return finish();
@@ -857,7 +857,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
       if(!b){ box.innerHTML='<div class="sub">기록 없음</div>'; return; }
       const cur=S.result;
       let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">지금 결과 ${cur.wins}승 · 차이 ${b.r.wins-cur.wins>=0?"+":""}${b.r.wins-cur.wins}승</span></div>`;
-      h+=`<div class="sub">룰렛 ${b.draws}번 (서로 다른 팀-연도 ${b.teams}개) · 한 번에 한 명씩만</div>`;
+      h+=`<div class="sub">최종 ${b.draws}개 팀-연도 (서로 다른 팀 ${b.teams}개) · 한 팀에서 한 명씩</div>`;
       b.hs.forEach((sl,i)=>{ const p=b.H[i]; if(!p) return;
         h+=`<div class="row"><div class="sl">${sl.label}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
       b.SP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">선발${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
