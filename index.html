@@ -192,6 +192,7 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .best .cmp>div:nth-child(2),.best .cmp>div:nth-child(3){font-weight:700;color:var(--ink);font-size:13px}
 .best .cmp.hit>div:nth-child(3){color:var(--grass)}
 .best .cmp .none{color:var(--ink-3);font-weight:400}
+.best .cmp .pos{display:block;font-size:11px;font-weight:400;color:var(--clay)}
 .best .row{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
 .best .row:last-child{border-bottom:0}
 .best .sl{color:var(--ink-3);font-size:12px;font-weight:700}
@@ -867,9 +868,13 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
       let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">내 결과 ${cur.wins}승 ${cur.grade} · 차이 ${d>=0?"+":""}${d}승</span></div>`;
       h+=`<div class="sub">최종 ${b.draws}개 팀-연도 (서로 다른 팀 ${b.teams}개) · 한 팀에서 한 명씩</div>`;
       // 최적 라인업을 팀-연도별로 모음
-      const bestBy=new Map();
-      const push=(p)=>{ if(!p) return; const k=p.year+"|"+p.team; if(!bestBy.has(k)) bestBy.set(k,[]); bestBy.get(k).push(p); };
-      b.H.forEach(push); b.SP.forEach(push); b.RP.forEach(push);
+      const bestBy=new Map(), bestSlot=new Map();
+      const push=(p,lab)=>{ if(!p) return; bestSlot.set(p.id,lab);
+        const k=p.year+"|"+p.team; if(!bestBy.has(k)) bestBy.set(k,[]); bestBy.get(k).push(p); };
+      b.H.forEach((p,i)=>push(p, b.hs[i] && b.hs[i].label));
+      b.SP.forEach((p,i)=>push(p, "선발"+(i+1)));
+      b.RP.forEach((p,i)=>push(p, "불펜"+(i+1)));
+      const slotOf = p => bestSlot.get(p.id) || "";
       h+=`<div class="cmp-hd"><div>팀 · 연도</div><div>내 선택</div><div>최적</div></div>`;
       let same=0;
       S.picks.forEach((mine,i)=>{
@@ -879,13 +884,13 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
         if (opt) { arr.splice(arr.indexOf(opt),1); same++; } else { opt=arr.shift()||null; }
         const hit = opt && opt.id===mine.id;
         h+=`<div class="cmp${hit?" hit":""}"><div class="ty">${mine.year} ${mine.team}<span>${S.slots[i].label}</span></div>`
-          +`<div>${nm(mine)}</div><div>${opt?nm(opt):"<span class=\"none\">안 씀</span>"}</div></div>`;
+          +`<div>${nm(mine)}</div><div>${opt?`${nm(opt)}<span class="pos">${slotOf(opt)}</span>`:'<span class="none">안 씀</span>'}</div></div>`;
       });
       // 내가 안 쓴 팀-연도에서 최적이 쓴 선수 (다른 자리로 간 경우)
       const left=[]; bestBy.forEach((arr,k)=>arr.forEach(p=>left.push(p)));
       if (left.length){
         h+=`<div class="sub" style="margin-top:8px">내 라인업에 없던 선택</div>`;
-        left.forEach(p=>{ h+=`<div class="cmp"><div class="ty">${p.year} ${p.team}</div><div class="none">-</div><div>${nm(p)}</div></div>`; });
+        left.forEach(p=>{ h+=`<div class="cmp"><div class="ty">${p.year} ${p.team}</div><div class="none">-</div><div>${nm(p)}<span class="pos">${slotOf(p)}</span></div></div>`; });
       }
       h+=`<div class="sub" style="margin-top:8px">17자리 중 ${same}자리는 최적과 같은 선수</div>`;
       box.innerHTML=h;
