@@ -451,91 +451,109 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     return {dev,score,wins,losses:144-wins,grade:g[1],label:g[2]};
   }
 
-  // ---------- 테스트용: 이 판에 나온 팀-연도로 만들 수 있는 최강 라인업 ----------
-  // 팀 편차는 그룹별 평균의 합이라, 그룹 안에서는 선수별 기여도의 단순 합을 최대화하면 된다.
+  // ---------- 테스트용: 이 판에 나온 팀-연도로 만들 수 있던 최강 라인업 ----------
+  // 룰렛 1회 = 그 팀-연도에서 선수 1명. 같은 팀-연도가 여러 번 나왔으면 그 횟수만큼만 뽑을 수 있다.
+  // 슬롯 -> 선수 -> 팀-연도(용량=등장 횟수) -> 싱크 의 최소비용 최대흐름으로 정확해를 구한다.
   function soloVal(p){
     const feats = p.role==="H" ? PR.HIT : PR.PIT;
     const share = p.role==="H" ? 1 : (p.role==="SP" ? PR.SP_SHARE : 1-PR.SP_SHARE);
     let v=0; for (const k of feats) v += PR.COEF[k]*PR.K[k]*p.z[k]*share;
     return v;
   }
-  function bestPitchers(pool, role, n, maxF){
-    const c = pool.filter(p=>p.role===role).sort((a,b)=>soloVal(b)-soloVal(a));
-    const dom=c.filter(p=>!p.foreign), fo=c.filter(p=>p.foreign);
-    let best=null;
-    for (let f=0; f<=Math.min(maxF, fo.length, n); f++){
-      if (dom.length < n-f) continue;
-      const pick=[...fo.slice(0,f), ...dom.slice(0,n-f)];
-      const v=pick.reduce((t,p)=>t+soloVal(p),0);
-      if (!best || v>best.v) best={v, pick, f};
-    }
-    return best;
-  }
-  // 타자 9자리 배정: 슬롯 비트마스크 × 외국인 수 DP (정확해)
-  function bestHitters(pool, slots, maxF){
-    const cand = pool.filter(p=>p.role==="H");
-    const N=slots.length, FULL=(1<<N)-1, FC=Math.min(maxF,N)+1;
-    const size=(FULL+1)*FC, NEG=-1e9;
-    let dp=new Float64Array(size).fill(NEG); dp[0]=0;
-    const from=new Int32Array(cand.length*size).fill(-1);
-    for (let i=0;i<cand.length;i++){
-      const p=cand[i], isF=p.foreign?1:0, v=soloVal(p);
-      const nd=Float64Array.from(dp);
-      for (let m=0;m<=FULL;m++) for (let f=0;f<FC;f++){
-        const cur=dp[m*FC+f]; if (cur<=NEG/2) continue;
-        if (isF && f+1>=FC) continue;
-        for (let sIdx=0;sIdx<N;sIdx++){
-          const bit=1<<sIdx; if (m&bit) continue;
-          if (!fitsSlot(p, slots[sIdx])) continue;
-          const nf=f+isF, key=(m|bit)*FC+nf;
-          if (cur+v > nd[key]){ nd[key]=cur+v; from[i*size+key]=m*FC+f+sIdx*size*0 + 0; from[i*size+key]=(m*FC+f)*16+sIdx; }
-        }
-      }
-      dp=nd;
-    }
-    let bestKey=-1, bestV=NEG;
-    for (let f=0;f<FC;f++){ const k=FULL*FC+f; if (dp[k]>bestV){ bestV=dp[k]; bestKey=k; } }
-    if (bestKey<0) return null;
-    // 역추적
-    const out=new Array(N).fill(null); let key=bestKey;
-    for (let i=cand.length-1;i>=0 && key>0;i--){
-      const rec=from[i*size+key];
-      if (rec<0) continue;
-      const prev=Math.floor(rec/16), sIdx=rec%16;
-      out[sIdx]=cand[i]; key=prev;
-    }
-    return {v:bestV, picks:out, f:bestKey%FC};
-  }
   function fitsSlot(p, sl){
     if (p.role!==sl.role) return false;
     if (sl.role!=="H" || !sl.pos) return true;
     return p.eligible.some(x=>sl.pos.has(x));
   }
+  function mcmf(n, edges, s, t){   // SPFA 기반 최소비용 최대흐름
+    const head=new Array(n).fill(-1), to=[], nx=[], cap=[], cst=[];
+    const add=(u,v,c,w)=>{ to.push(v); cap.push(c); cst.push(w); nx.push(head[u]); head[u]=to.length-1;
+                           to.push(u); cap.push(0); cst.push(-w); nx.push(head[v]); head[v]=to.length-1; };
+    for (const e of edges) add(e[0],e[1],e[2],e[3]);
+    let flow=0, cost=0;
+    for(;;){
+      const dist=new Array(n).fill(Infinity), inq=new Array(n).fill(false), pe=new Array(n).fill(-1);
+      dist[s]=0; const q=[s]; inq[s]=true;
+      while(q.length){
+        const u=q.shift(); inq[u]=false;
+        for(let e=head[u]; e!==-1; e=nx[e]){
+          if (cap[e]<=0) continue;
+          const v=to[e], d=dist[u]+cst[e];
+          if (d<dist[v]-1e-12){ dist[v]=d; pe[v]=e; if(!inq[v]){ inq[v]=true; q.push(v); } }
+        }
+      }
+      if (dist[t]===Infinity) break;
+      let f=Infinity;
+      for(let v=t; v!==s; v=to[pe[v]^1]) f=Math.min(f, cap[pe[v]]);
+      for(let v=t; v!==s; v=to[pe[v]^1]){ cap[pe[v]]-=f; cap[pe[v]^1]+=f; }
+      flow+=f; cost+=f*dist[t];
+    }
+    return {flow, cost, cap, to, head, nx};
+  }
+  function solveBest(draws, slots, banned){
+    // 팀-연도별 등장 횟수
+    const cnt=new Map();
+    for (const d of draws){ const k=d.y+"|"+d.nick; cnt.set(k,(cnt.get(k)||0)+1); }
+    const tyKeys=[...cnt.keys()];
+    // 후보 선수: 인물 단위로 기여도가 가장 높은 항목만 (같은 인물 두 번 금지)
+    const byPerson=new Map();
+    for (const k of tyKeys) for (const p of (byTY.get(k)||[])){
+      if (banned.has(p.id)) continue;
+      const pk=person(p), cur=byPerson.get(pk);
+      if (!cur || soloVal(p)>soloVal(cur.p)) byPerson.set(pk,{p, ty:k});
+    }
+    const cands=[...byPerson.values()];
+    if (!cands.length) return null;
+    // 슬롯 묶기: 야수는 자리별, 투수는 선발/불펜 한 덩이
+    const hs=slots.filter(x=>x.role==="H");
+    const nSP=slots.filter(x=>x.role==="SP").length, nRP=slots.filter(x=>x.role==="RP").length;
+    const groups=hs.map(sl=>({sl, capn:1})).concat(
+      nSP?[{sl:{role:"SP"}, capn:nSP}]:[], nRP?[{sl:{role:"RP"}, capn:nRP}]:[]);
+    const S0=0, base=1, pBase=base+groups.length, tBase=pBase+cands.length, T=tBase+tyKeys.length;
+    const edges=[];
+    groups.forEach((g,i)=>edges.push([S0, base+i, g.capn, 0]));
+    const tyIdx=new Map(tyKeys.map((k,i)=>[k,i]));
+    cands.forEach((c,j)=>{
+      groups.forEach((g,i)=>{ if (fitsSlot(c.p,g.sl)) edges.push([base+i, pBase+j, 1, -soloVal(c.p)]); });
+      edges.push([pBase+j, tBase+tyIdx.get(c.ty), 1, 0]);
+    });
+    tyKeys.forEach((k,i)=>edges.push([tBase+i, T, cnt.get(k), 0]));
+    const r=mcmf(T+1, edges, S0, T);
+    // 선택된 선수 역추출
+    const chosen=[];
+    for (let e=0; e<r.to.length; e+=2){
+      if (r.cap[e+1]>0){   // 정방향 간선에 흐름이 있음
+        const u=r.to[e+1], v=r.to[e];
+        if (u>=base && u<pBase && v>=pBase && v<tBase) chosen.push({gi:u-base, c:cands[v-pBase]});
+      }
+    }
+    if (!chosen.length) return null;
+    const H=new Array(hs.length).fill(null), SP=[], RP=[];
+    for (const ch of chosen){
+      if (ch.gi < hs.length) H[ch.gi]=ch.c.p;
+      else if (groups[ch.gi].sl.role==="SP") SP.push(ch.c.p); else RP.push(ch.c.p);
+    }
+    return {H, SP, RP, hs, picked:chosen.length};
+  }
   function bestPossible(){
     if (!S || !S.seen || !S.seen.length) return null;
-    const seen=new Map();
-    for (const t of S.seen) for (const p of (byTY.get(t.y+"|"+t.nick)||[])) if(!seen.has(p.id)) seen.set(p.id,p);
-    // 같은 인물은 한 번만 쓸 수 있으므로, 인물별로 기여도가 가장 높은 한 항목만 남긴다.
-    const byPerson=new Map();
-    for (const p of seen.values()){
-      const k=person(p), cur=byPerson.get(k);
-      if (!cur || soloVal(p)>soloVal(cur)) byPerson.set(k,p);
-    }
-    const pool=[...byPerson.values()];
-    const slots=S.slots, hs=slots.filter(x=>x.role==="H");
     const maxF = MODES[S.mode].noForeignLimit ? 99 : MAX_FOREIGN;
-    const nSP=slots.filter(x=>x.role==="SP").length, nRP=slots.filter(x=>x.role==="RP").length;
-    let best=null;
-    for (let fh=0; fh<=Math.min(maxF,hs.length); fh++){
-      const H=bestHitters(pool, hs, fh); if(!H) continue;
-      const SPb=bestPitchers(pool,"SP",nSP, maxF-H.f); if(!SPb) continue;
-      const RPb=bestPitchers(pool,"RP",nRP, maxF-H.f-SPb.f); if(!RPb) continue;
-      const tot=H.v+SPb.v+RPb.v;
-      if (!best || tot>best.tot) best={tot, H, SP:SPb, RP:RPb};
+    const banned=new Set();
+    let sol=null;
+    for (let guard=0; guard<12; guard++){
+      sol=solveBest(S.seen, S.slots, banned);
+      if (!sol) return null;
+      const all=[...sol.H.filter(Boolean), ...sol.SP, ...sol.RP];
+      const fo=all.filter(p=>p.foreign);
+      if (fo.length<=maxF) break;
+      // 외국인 초과: 기여도가 가장 낮은 외국인을 빼고 다시 푼다
+      fo.sort((a,b)=>soloVal(a)-soloVal(b));
+      banned.add(fo[0].id);
     }
-    if (!best) return null;
-    const r=scoreLineup(best.H.picks.filter(Boolean), best.SP.pick, best.RP.pick, S.mode);
-    return {r, hs, H:best.H.picks, SP:best.SP.pick, RP:best.RP.pick, teams:S.seen.length, pool:pool.length};
+    const H=sol.H.filter(Boolean);
+    const r=scoreLineup(H, sol.SP, sol.RP, S.mode);
+    const uniq=new Set(S.seen.map(t=>t.y+"|"+t.nick)).size;
+    return {r, hs:sol.hs, H:sol.H, SP:sol.SP, RP:sol.RP, draws:S.seen.length, teams:uniq, filled:sol.picked};
   }
 
   // ---------- 상태 ----------
@@ -706,7 +724,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
     cancelState();
     const res=drawTY(lock,exclude); if(!res) return;
     S.spin={y:res.y,nick:res.nick}; S.cands=res.cands;
-    if (S.seen && !S.seen.some(t=>t.y===res.y&&t.nick===res.nick)) S.seen.push({y:res.y,nick:res.nick});   // 테스트용: 이 판에 나온 팀-연도
+    if (S.seen) S.seen.push({y:res.y,nick:res.nick});   // 테스트용: 룰렛에 나온 팀-연도 (중복 포함, 1회 = 선수 1명 기회)
     $("spin").disabled=true; $("skipTeam").disabled=true; $("skipYear").disabled=true; hideCands();
     const ry=$("reelYear"), rt=$("reelTeam");
     // 다시뽑기로 한쪽이 고정된 경우, 고정된 칸은 돌리지 않고 값을 그대로 둔다.
@@ -839,7 +857,7 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
       if(!b){ box.innerHTML='<div class="sub">기록 없음</div>'; return; }
       const cur=S.result;
       let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">지금 결과 ${cur.wins}승 · 차이 ${b.r.wins-cur.wins>=0?"+":""}${b.r.wins-cur.wins}승</span></div>`;
-      h+=`<div class="sub">나온 팀 ${b.teams}개 · 후보 ${b.pool}명 중 최적 배치</div>`;
+      h+=`<div class="sub">룰렛 ${b.draws}번 (서로 다른 팀-연도 ${b.teams}개) · 한 번에 한 명씩만</div>`;
       b.hs.forEach((sl,i)=>{ const p=b.H[i]; if(!p) return;
         h+=`<div class="row"><div class="sl">${sl.label}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
       b.SP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">선발${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
