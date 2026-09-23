@@ -185,6 +185,13 @@ tr.dim td .name{color:var(--ink-3);font-weight:500}
 .best summary{cursor:pointer;color:var(--ink-3);font-size:13px}
 .best .hd{margin:10px 0 6px;font-weight:700;color:var(--ink)}
 .best .sub{color:var(--ink-3);font-size:12px;font-weight:400;margin-left:6px}
+.best .cmp-hd,.best .cmp{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:6px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
+.best .cmp-hd{font-size:11px;color:var(--ink-3);letter-spacing:.02em;border-bottom:1px solid var(--ink-3)}
+.best .cmp .ty{font-size:11.5px;color:var(--ink-3);line-height:1.25}
+.best .cmp .ty span{display:block;color:var(--clay);font-weight:700}
+.best .cmp>div:nth-child(2),.best .cmp>div:nth-child(3){font-weight:700;color:var(--ink);font-size:13px}
+.best .cmp.hit>div:nth-child(3){color:var(--grass)}
+.best .cmp .none{color:var(--ink-3);font-weight:400}
 .best .row{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
 .best .row:last-child{border-bottom:0}
 .best .sl{color:var(--ink-3);font-size:12px;font-weight:700}
@@ -856,12 +863,31 @@ footer{font-size:12px;color:var(--ink-3);text-align:center;opacity:.8}
       let b=null; try{ b=bestPossible(); }catch(e){ box.innerHTML='<div class="sub">계산 실패</div>'; return; }
       if(!b){ box.innerHTML='<div class="sub">기록 없음</div>'; return; }
       const cur=S.result;
-      let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">지금 결과 ${cur.wins}승 · 차이 ${b.r.wins-cur.wins>=0?"+":""}${b.r.wins-cur.wins}승</span></div>`;
+      const d=b.r.wins-cur.wins;
+      let h=`<div class="hd">${b.r.wins}승 ${b.r.losses}패 · ${b.r.grade}<span class="sub">내 결과 ${cur.wins}승 ${cur.grade} · 차이 ${d>=0?"+":""}${d}승</span></div>`;
       h+=`<div class="sub">최종 ${b.draws}개 팀-연도 (서로 다른 팀 ${b.teams}개) · 한 팀에서 한 명씩</div>`;
-      b.hs.forEach((sl,i)=>{ const p=b.H[i]; if(!p) return;
-        h+=`<div class="row"><div class="sl">${sl.label}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
-      b.SP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">선발${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
-      b.RP.forEach((p,i)=>{ h+=`<div class="row"><div class="sl">불펜${i+1}</div><div><div class="nm">${nm(p)}</div><div class="yr">${p.year} ${p.full}</div></div></div>`; });
+      // 최적 라인업을 팀-연도별로 모음
+      const bestBy=new Map();
+      const push=(p)=>{ if(!p) return; const k=p.year+"|"+p.team; if(!bestBy.has(k)) bestBy.set(k,[]); bestBy.get(k).push(p); };
+      b.H.forEach(push); b.SP.forEach(push); b.RP.forEach(push);
+      h+=`<div class="cmp-hd"><div>팀 · 연도</div><div>내 선택</div><div>최적</div></div>`;
+      let same=0;
+      S.picks.forEach((mine,i)=>{
+        if(!mine) return;
+        const k=mine.year+"|"+mine.team, arr=bestBy.get(k)||[];
+        let opt=arr.find(x=>x.id===mine.id);
+        if (opt) { arr.splice(arr.indexOf(opt),1); same++; } else { opt=arr.shift()||null; }
+        const hit = opt && opt.id===mine.id;
+        h+=`<div class="cmp${hit?" hit":""}"><div class="ty">${mine.year} ${mine.team}<span>${S.slots[i].label}</span></div>`
+          +`<div>${nm(mine)}</div><div>${opt?nm(opt):"<span class=\"none\">안 씀</span>"}</div></div>`;
+      });
+      // 내가 안 쓴 팀-연도에서 최적이 쓴 선수 (다른 자리로 간 경우)
+      const left=[]; bestBy.forEach((arr,k)=>arr.forEach(p=>left.push(p)));
+      if (left.length){
+        h+=`<div class="sub" style="margin-top:8px">내 라인업에 없던 선택</div>`;
+        left.forEach(p=>{ h+=`<div class="cmp"><div class="ty">${p.year} ${p.team}</div><div class="none">-</div><div>${nm(p)}</div></div>`; });
+      }
+      h+=`<div class="sub" style="margin-top:8px">17자리 중 ${same}자리는 최적과 같은 선수</div>`;
       box.innerHTML=h;
     },30);
   }
